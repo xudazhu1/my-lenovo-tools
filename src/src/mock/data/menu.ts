@@ -5,6 +5,11 @@ const menus: any[] = [
     path: '/',
   },
   {
+    name: '控制台(原)',
+    icon: 'yibiaopan2',
+    path: '/dashboard',
+  },
+  {
     path: '/icon',
     icon: 'tubiao',
     name: '图标',

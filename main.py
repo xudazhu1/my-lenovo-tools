@@ -50,8 +50,8 @@ def WebViewApp(ifCef=False):
     width = screens.width
     height = screens.height
     # 程序窗口大小
-    initWidth = int(width * 2 / 3)
-    initHeight = int(height * 4 / 5)
+    initWidth = int(width * 2 / 4)
+    initHeight = int(height * 4 / 6)
     minWidth = int(initWidth / 2)
     minHeight = int(initHeight / 2)
 

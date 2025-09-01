@@ -39,7 +39,7 @@ export default defineConfig(({ mode, command, }) => {
     },
     server: {
       port: 5173,
-      open: true,
+      open: false, // 不打开网址 因为pyWebview已经打开了!
       proxy: {
         '/api/': {
           target: 'http://localhost:3000/',

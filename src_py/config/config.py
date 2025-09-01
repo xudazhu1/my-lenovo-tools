@@ -17,13 +17,13 @@ class Config:
     ##
     # 程序基础配置信息
     ##
-    appName = 'pywebview-vue3-template'  # 应用名称
-    appNameEN = 'pywebview-vue3-template'    # 应用名称-英文（用于生成缓存文件夹，必须是英文）
+    appName = 'MyLenovoTools'  # 应用名称
+    appNameEN = 'MyLenovoTools'    # 应用名称-英文（用于生成缓存文件夹，必须是英文）
     appVersion = "V1.0.0"  # 应用版本号
-    appDeveloper = "tansen"  # 应用开发者
-    appBlogs = "https://github.com/tansen87"  # github
+    appDeveloper = "x-easy(xudazhu1)"  # 应用开发者
+    appBlogs = "https://github.com/xudazhu1"  # github
     appPackage = 'pywebview-vue3-template'    # 应用包名，用于在本地电脑生成 pywebview-toolkit.ppx 唯一文件夹
-    appUpdateUrl = 'https://github.com/tansen87'
+    appUpdateUrl = 'https://github.com/xudazhu1'
     appISSID = '56CD5B56-61AB-8E1A-DB2D-3311562E5350'    # Inno Setup 打包唯一编号。在执行 pnpm run init 之前，请设置为空，程序会自动生成唯一编号，生成后请勿修改！！！
 
     ##

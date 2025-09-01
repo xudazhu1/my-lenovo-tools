@@ -10,7 +10,11 @@ addRoutes(router, [{
   component: Layout,
   children: [
     {
-      path: '',
+      path: '/',
+      component: () => import('@p-index/views/console_view/index.vue'),
+    },
+    {
+      path: '/dashboard',
       component: () => import('@p-index/views/dashboard/index.vue'),
     },
     {

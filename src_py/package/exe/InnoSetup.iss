@@ -2,11 +2,11 @@
 ; 脚本由 Inno Setup 脚本向导 生成！
 ; 有关创建 Inno Setup 脚本文件的详细资料请查阅帮助文档！
 
-#define MyAppName "pywebview-toolkit"
+#define MyAppName "MyLenovoTools"
 #define MyAppVersion "1.0.0"
-#define MyAppPublisher "tansen"
-#define MyAppURL "https://github.com/tansen87"
-#define MyAppExeName "pywebview-toolkit.exe"
+#define MyAppPublisher "x-easy(xudazhu1)"
+#define MyAppURL "https://github.com/xudazhu1"
+#define MyAppExeName "MyLenovoTools.exe"
 #define MyAppAssocName MyAppName + " 文件"
 #define MyAppAssocExt ".myp"
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
@@ -28,9 +28,9 @@ ChangesAssociations=yes
 DisableProgramGroupPage=yes
 ; 移除以下行，以在管理安装模式下运行（为所有用户安装）。
 PrivilegesRequired=lowest
-OutputDir=E:\Desktop\pyweb-toolkit\build
-OutputBaseFilename=pywebview-toolkit-V1.0.0_Windows
-SetupIconFile=E:\Desktop\pyweb-toolkit\src_py\icon\logo.ico
+OutputDir=D:\ruanjian\pycharmProject\pywebview-vue3-template\build
+OutputBaseFilename=MyLenovoTools-V1.0.0_Windows
+SetupIconFile=D:\ruanjian\pycharmProject\pywebview-vue3-template\src_py\icon\logo.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -42,7 +42,7 @@ Name: "chinesesimp"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "E:\Desktop\pyweb-toolkit\build\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\ruanjian\pycharmProject\pywebview-vue3-template\build\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 ; 注意: 不要在任何共享系统文件上使用“Flags: ignoreversion”
 
 [Registry]
