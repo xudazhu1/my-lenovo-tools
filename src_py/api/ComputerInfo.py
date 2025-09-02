@@ -1,7 +1,12 @@
+import ctypes
 import socket
+import subprocess
+
 import psutil
 import screen_brightness_control as sbc
 from ctypes import cast, POINTER, windll, c_uint, sizeof, byref
+
+import wmi
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
@@ -12,6 +17,8 @@ class ComputerInfo:
         devices = AudioUtilities.GetSpeakers()
         interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         self.volume = cast(interface, POINTER(IAudioEndpointVolume))
+        # 连接到 root\wmi 命名空间
+        self.wmi_interface = wmi.WMI(namespace='root\\wmi')
 
     # 获取计算机名
     def get_computer_name(self):
@@ -34,16 +41,40 @@ class ComputerInfo:
         }
 
     # 获取屏幕亮度
-    def get_brightness(self):
+    def get_brightness_old(self):
         try:
-            return sbc.get_brightness(display=0)[0]  # 主屏幕亮度
+            val2 = sbc.get_brightness()
+            print(val2)
+            return sbc.get_brightness()[0]  # 主屏幕亮度
         except Exception as e:
             return f"Error: {e}"
 
     # 设置屏幕亮度 (0-100)
-    def set_brightness(self, value: int):
+    def set_brightness_old(self, value: int):
         value = max(0, min(100, value))
-        sbc.set_brightness(value, display=0)
+        sbc.set_brightness(value)
+
+    # 获取屏幕亮度 新的 用于独显模式下使用 核显模式应该也有效果
+    def get_brightness(self) -> int:
+        """获取当前屏幕亮度 (0-100)"""
+        cmd = [
+            "powershell",
+            "-Command",
+            "(Get-WmiObject -Namespace root\\wmi -Class WmiMonitorBrightness).CurrentBrightness"
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        return int(result.stdout.strip())
+
+    # 设置屏幕亮度 (0-100) 新的 解决独显模式下不生效的问题
+    def set_brightness(self, value: int):
+        """设置屏幕亮度 (0-100)"""
+        cmd = [
+            "powershell",
+            "-Command",
+            f"$methods = Get-WmiObject -Namespace root\\wmi -Class WmiMonitorBrightnessMethods; "
+            f"$methods.WmiSetBrightness(1, {value})"
+        ]
+        subprocess.run(cmd, capture_output=True, text=True)
 
     # 获取音量 (0.0 - 1.0)
     def get_volume(self):
@@ -91,6 +122,8 @@ if __name__ == "__main__":
     print("亮度:", pc.get_brightness())
     print("音量:", pc.get_volume())
     print("是否静音:", pc.is_muted())
+
+    pc.set_brightness(83)
 
     # 示例
     # pc.mute(True)        # 静音

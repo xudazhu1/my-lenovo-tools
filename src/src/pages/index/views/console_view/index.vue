@@ -13,7 +13,8 @@
           min="0"
           max="100"
           v-model="info.brightness"
-          @input="updateBrightness"
+          @input="updateValue"
+          @wheel.prevent="onWheel('brightness', $event)"
           class="slider brightness"
         />
       </div>
@@ -26,7 +27,8 @@
           min="0"
           max="100"
           v-model="info.volume"
-          @input="updateVolume"
+          @input="updateValue"
+          @wheel.prevent="onWheel('volume', $event)"
           class="slider volume"
         />
         <button class="mute-btn" @click="toggleMute" style="margin-top: -16px;">
@@ -114,22 +116,24 @@ async function refreshComputerInfo() {
 }
 
 
-// 更新亮度
-async function updateBrightness() {
+// 更新亮度&音量
+async function updateValue() {
   if (!values.isPyWeb ) {
     ElMessage.success('不是PyWeb环境!')
     return
   }
   await window.pywebview.api.set_brightness(info.brightness)
-}
-
-// 更新音量
-async function updateVolume() {
-  if (!values.isPyWeb ) {
-    ElMessage.success('不是PyWeb环境!')
-    return
-  }
   await window.pywebview.api.set_volume(info.volume / 100)
+}
+// 鼠标调节滚动条
+function onWheel(key, event) {
+  const step = event.ctrlKey ? 5 : 1
+  if (event.deltaY < 0) {
+    info[key] = Math.min(100, info[key] + step)
+  } else {
+    info[key] = Math.max(0, info[key] - step)
+  }
+  updateValue()
 }
 
 // 切换静音
