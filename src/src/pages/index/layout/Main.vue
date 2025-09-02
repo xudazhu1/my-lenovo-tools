@@ -10,6 +10,10 @@
 </template>
 
 <style scoped>
+.p-5 {
+  padding: 0!important;
+}
+
 .fade {
   &-enter-from, &-leave-to {
     @apply translate-x-[-30px] opacity-0;

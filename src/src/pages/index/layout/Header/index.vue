@@ -4,13 +4,13 @@
       <svg-icon name="zhedie" class="text-h5 transition-all duration-300" :class="{ 'rotate-180': isAsideCollapse }" />
     </div>
     <!-- <div class="px-4 text-h6 font-semibold">Hello, Xpzheng!</div> -->
-    <div class="px-4">
-      <el-input v-model="keyword" class="w-[300px]" placeholder="搜索关键词" icon="search" @keydown.enter="search">
-        <template #suffix>
-          <svg-icon name="sousuo" class="text-h6 cursor-pointer" @click="search" />
-        </template>
-      </el-input>
-    </div>
+<!--    <div class="px-4">-->
+<!--      <el-input v-model="keyword" class="w-[300px]" placeholder="搜索关键词" icon="search" @keydown.enter="search">-->
+<!--        <template #suffix>-->
+<!--          <svg-icon name="sousuo" class="text-h6 cursor-pointer" @click="search" />-->
+<!--        </template>-->
+<!--      </el-input>-->
+<!--    </div>-->
     <div class="flex-1" />
     <div class="px-4 flex items-center">
       <span class="nav-button" @click="openRepo">

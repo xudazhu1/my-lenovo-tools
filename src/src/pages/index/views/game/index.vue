@@ -2,7 +2,7 @@
   <div class="dashboard">
     <!-- 基本状态 -->
     <div class="card">
-      <h3>基本状态</h3>
+      <h3>宏</h3>
       <p>计算机名: <span class="highlight">{{ info.computerName }}</span></p>
       <p>电池: <span class="highlight">{{ info.battery }}</span></p>
       <!-- 屏幕亮度 -->

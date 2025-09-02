@@ -21,8 +21,13 @@ class ComputerInfo:
     def get_battery(self):
         battery = psutil.sensors_battery()
         if battery is None:
-            return {"status": "No battery detected"}
+            return {
+                "status": "No battery detected",
+                "exist": False,
+            }
         return {
+            "status": "battery detected",
+            "exist": True,
             "percent": battery.percent,
             "plugged": battery.power_plugged,
             "time_left": battery.secsleft

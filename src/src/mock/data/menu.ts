@@ -1,8 +1,18 @@
 const menus: any[] = [
   {
     name: '控制台',
-    icon: 'yibiaopan2',
+    icon: 'yibiaopan',
     path: '/',
+  },
+  {
+    name: '定时任务',
+    icon: 'clock',
+    path: '/clock',
+  },
+  {
+    name: '宏',
+    icon: 'game',
+    path: '/game',
   },
   {
     name: '控制台(原)',
