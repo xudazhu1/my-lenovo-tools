@@ -1,0 +1,9 @@
+[
+  {"id": "t1", "name": "t1Name", "type": "delay", "params": {"seconds": 10}},
+  {"id": "t2", "name": "t2Name", "type": "cron", "params": {"hour": 8, "minute": 0}},
+  {"id": "t3", "name": "t3Name", "type": "power", "params": {"event_type": "both"}},
+  {"id": "t4", "name": "t4Name", "type": "process_start", "params": {"process_name": "Notepad.exe"}},
+  {"id": "t5", "name": "t5Name", "type": "process_stop", "params": {"process_name": "Notepad.exe"}},
+  {"id": "t6", "name": "t6Name", "type": "process_start", "params": {"process_name": "chrome.exe"}},
+  {"id": "t7", "name": "t7Name", "type": "process_stop", "params": {"process_name": "chrome.exe"}}
+]

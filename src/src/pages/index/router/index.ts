@@ -20,8 +20,8 @@ addRoutes(router, [
         component: () => import('@p-index/views/clock/index.vue'),
       },
       {
-        path: '/game',
-        component: () => import('@p-index/views/game/index.vue'),
+        path: '/macros',
+        component: () => import('@p-index/views/macros/index.vue'),
       },
       {
         path: '/dashboard',

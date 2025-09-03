@@ -3,7 +3,7 @@
     {
       "name": "test_macro",
       "programs": ["notepad2.exe", "calc2.exe"],
-      "hotkey": "q+e",
+      "hotkey": ["q+e"],
       "stop_key": "<esc>",
       "actions": [
         {"keyboard": "a"},
@@ -21,19 +21,29 @@
       ]
     },
     {
-      "name": "mouse_macro",
-      "programs": ["chrome2.exe", "notepad2.exe"],
-      "hotkey": "w",
+      "name": "测试",
+      "programs": ["chrome2.exe", "notepad.exe"],
+      "hotkey": ["w", "a", "s", "d"],
       "stop_key": "<esc>",
       "actions": [
-        {"mouse": "x1"},
-        {"mouse": "x2"}
+        {"keyboard": "a"},
+        {"wait": 0.2},
+        {"repeat": {"count": 2, "action": {"keyboard": "b"}}},
+        {"loop": {"count": 2, "actions": [
+          {"keyboard": "c"},
+          {"wait": 0.1},
+          {"keyboard": "d"}
+        ]}},
+        {"loop": {"count": 0, "actions": [
+          {"keyboard": "e"},
+          {"wait": 0.05}
+        ]}}
       ]
     },
     {
-      "name": "mouse_macro",
+      "name": "鸣潮视角",
       "programs": ["Client-Win64-Shipping.exe"],
-      "hotkey": "w",
+      "hotkey": ["w"],
       "stop_key": "<esc>",
       "actions": [
         {"loop": {"count": 3, "actions": [
@@ -44,7 +54,7 @@
     {
       "name": "mouse_macro2",
       "programs": ["chrome2.exe"],
-      "hotkey": "<ctrl>+c",
+      "hotkey": ["<ctrl>+c"],
       "stop_key": "<esc>",
       "actions": [
         {"mouse": "right"},

@@ -12,7 +12,7 @@ const menus: any[] = [
   {
     name: '宏',
     icon: 'game',
-    path: '/game',
+    path: '/macros',
   },
   {
     name: '控制台(原)',

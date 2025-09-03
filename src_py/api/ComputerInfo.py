@@ -62,8 +62,11 @@ class ComputerInfo:
             "-Command",
             "(Get-WmiObject -Namespace root\\wmi -Class WmiMonitorBrightness).CurrentBrightness"
         ]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        return int(result.stdout.strip())
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            return int(result.stdout.strip())
+        except Exception as e:
+            return self.get_brightness_old()
 
     # 设置屏幕亮度 (0-100) 新的 解决独显模式下不生效的问题
     def set_brightness(self, value: int):
@@ -74,7 +77,10 @@ class ComputerInfo:
             f"$methods = Get-WmiObject -Namespace root\\wmi -Class WmiMonitorBrightnessMethods; "
             f"$methods.WmiSetBrightness(1, {value})"
         ]
-        subprocess.run(cmd, capture_output=True, text=True)
+        try:
+            subprocess.run(cmd, capture_output=True, text=True)
+        except Exception as e:
+            return self.set_brightness_old(value)
 
     # 获取音量 (0.0 - 1.0)
     def get_volume(self):

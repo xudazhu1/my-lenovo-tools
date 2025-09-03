@@ -4,8 +4,7 @@ import threading
 import psutil
 import win32gui
 import win32process
-# from keyboard import on_press
-from pynput import keyboard as pynputKB
+from pynput import keyboard as pynput_kb
 from pynput import mouse as pm
 
 from src_py.api import system
@@ -13,7 +12,7 @@ from src_py.api import system
 # ===================== 全局状态 =====================
 running_flags = {}  # 宏运行状态
 mouse_ctrl = pm.Controller()
-keyboard_ctrl = pynputKB.Controller()
+keyboard_ctrl = pynput_kb.Controller()
 
 # ===================== 执行动作 =====================
 def perform_actions(actions, macro_name):
@@ -127,7 +126,7 @@ def run_macro(macro):
     if stop_key:
         def stop_cb():
             stop_macro(name)
-        pynputKB.GlobalHotKeys({stop_key: stop_cb}).start()
+        pynput_kb.GlobalHotKeys({stop_key: stop_cb}).start()
 
     perform_actions(actions, name)
     print(f"[{name}] 宏结束")
@@ -136,7 +135,7 @@ def run_macro(macro):
 # ===================== 注册宏 =====================
 def register_macros(config):
     for macro in config["macros"]:
-        hotkey = macro["hotkey"]
+        hotkey_arr = macro["hotkey"]
         name = macro["name"]
 
         # 通用回调
@@ -146,42 +145,44 @@ def register_macros(config):
             else:
                 threading.Thread(target=run_macro, args=(m,), daemon=True).start()
 
-        # 键盘+鼠标组合
-        if "mouse" in hotkey.lower() and "+" in hotkey:
-            parts = hotkey.split("+")
-            mouse_btn = None
-            keys = []
-            for p in parts:
-                p = p.strip().lower()
-                if p.startswith("mouse:"):
-                    mouse_btn = p.split(":")[1]
-                else:
-                    keys.append(p)
-            if mouse_btn:
-                def combo_handler(m=macro, keys=keys, btn=mouse_btn):
-                    try:
-                        if all(pynputKB.Controller().pressed(k) for k in keys):
-                            if pm.Controller().pressed(btn):
-                                threading.Thread(target=run_macro, args=(m,), daemon=True).start()
-                    except Exception:
-                        pass
-                # 注意 GlobalHotKeys 只支持键盘部分
-                keyboard_hotkey = "+".join([f"<{k}>" if k in ["ctrl","alt","shift","cmd"] else k for k in keys])
-                pynputKB.GlobalHotKeys({keyboard_hotkey: combo_handler}).start()
-                print(f"[{name}] 已注册组合热键: {hotkey}")
+        # 最新版的话 hotkey 变成一个数组, 可以有 多个热键 触发同一个宏脚本, 所以需要遍历
+        for hotkey in hotkey_arr:
+            # 键盘+鼠标组合 触发不灵敏 最好不用~
+            if "mouse" in hotkey.lower() and "+" in hotkey:
+                parts = hotkey.split("+")
+                mouse_btn = None
+                keys = []
+                for p in parts:
+                    p = p.strip().lower()
+                    if p.startswith("mouse:"):
+                        mouse_btn = p.split(":")[1]
+                    else:
+                        keys.append(p)
+                if mouse_btn:
+                    def combo_handler(m=macro, keys=keys, btn=mouse_btn):
+                        try:
+                            if all(pynput_kb.Controller().pressed(k) for k in keys):
+                                if pm.Controller().pressed(btn):
+                                    threading.Thread(target=run_macro, args=(m,), daemon=True).start()
+                        except Exception:
+                            pass
+                    # 注意 GlobalHotKeys 只支持键盘部分
+                    keyboard_hotkey = "+".join([f"<{k}>" if k in ["ctrl","alt","shift","cmd"] else k for k in keys])
+                    pynput_kb.GlobalHotKeys({keyboard_hotkey: combo_handler}).start()
+                    print(f"[{name}] 已注册组合热键: {hotkey}")
 
-        # 纯鼠标热键
-        elif hotkey.lower().startswith("mouse:"):
-            btn = hotkey.split(":")[1]
-            # 用 Listener 实例注册
-            pm.Listener(on_click=lambda x, y, button, pressed: handler() if pressed and button.name == btn else None).start()
-            print(f"[{name}] 已注册鼠标热键: {hotkey}")
+            # 纯鼠标热键
+            elif hotkey.lower().startswith("mouse:"):
+                btn = hotkey.split(":")[1]
+                # 用 Listener 实例注册
+                pm.Listener(on_click=lambda x, y, button, pressed: handler() if pressed and button.name == btn else None).start()
+                print(f"[{name}] 已注册鼠标热键: {hotkey}")
 
-        # 纯键盘热键
-        else:
-            # formatted_hotkey = format_hotkey(hotkey)
-            pynputKB.GlobalHotKeys({hotkey: handler}).start()
-            print(f"[{name}] 已注册键盘热键: {hotkey}")
+            # 纯键盘热键
+            else:
+                # formatted_hotkey = format_hotkey(hotkey)
+                pynput_kb.GlobalHotKeys({hotkey: handler}).start()
+                print(f"[{name}] 已注册键盘热键: {hotkey}")
 
 def stop_macro(name):
     running_flags[name] = False
@@ -204,6 +205,6 @@ if __name__ == "__main__":
 
     register_macros(config)
     print("宏系统已启动，按 Ctrl+C 退出")
-    listener = pynputKB.Listener(on_press=my_on_press)
+    listener = pynput_kb.Listener(on_press=my_on_press)
     listener.start()  # 开始监听线程
     listener.join()  # 等待线程结束（阻塞）
