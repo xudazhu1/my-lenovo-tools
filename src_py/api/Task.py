@@ -466,7 +466,10 @@ relations.json:
 """
 
 if __name__ == "__main__":
-    # 创建API实例供pywebview使用 window.pywebview.api.start() window.pywebview.api.stop() window.pywebview.api.restart()
+    # 创建API实例供pywebview使用
+    # window.pywebview.api.task_start()
+    # window.pywebview.api.task_stop()
+    # window.pywebview.api.task_restart()
     api = TaskManagerAPI()
 
     # 示例：启动任务管理器

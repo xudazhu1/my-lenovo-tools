@@ -20,13 +20,13 @@ class API(System):
         # 自动把 ComputerInfo 的方法挂到 API 上
         for name, method in inspect.getmembers(self.pc, predicate=inspect.ismethod):
             if not name.startswith("_"):  # 跳过私有方法
-                setattr(self, name, method)
+                setattr(self, "pc_" + name, method)
 
         self.task = TaskManagerAPI()
         # self.task.start()
         for name, method in inspect.getmembers(self.task, predicate=inspect.ismethod):
             if not name.startswith("_"):  # 跳过私有方法
-                setattr(self, name, method)
+                setattr(self, "task_" + name, method)
 
     def setWindow(self, window):
         System.window = window

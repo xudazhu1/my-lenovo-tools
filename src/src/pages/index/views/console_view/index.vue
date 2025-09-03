@@ -102,17 +102,17 @@ async function refreshComputerInfo() {
     ElMessage.success('不是PyWeb环境!')
     return
   }
-  info.computerName = await window.pywebview.api.get_computer_name()
-  let batteryInfo = await window.pywebview.api.get_battery()
+  info.computerName = await window.pywebview.api.pc_get_computer_name()
+  let batteryInfo = await window.pywebview.api.pc_get_battery()
   console.log(batteryInfo)
   if (batteryInfo.exist) {
     info.battery = batteryInfo.percent + "%"
   } else {
     info.battery = "No battery detected"
   }
-  info.brightness = await window.pywebview.api.get_brightness()
-  info.volume = await window.pywebview.api.get_volume() * 100
-  info.muted = await window.pywebview.api.is_muted()
+  info.brightness = await window.pywebview.api.pc_get_brightness()
+  info.volume = await window.pywebview.api.pc_get_volume() * 100
+  info.muted = await window.pywebview.api.pc_is_muted()
 }
 
 
@@ -122,8 +122,8 @@ async function updateValue() {
     ElMessage.success('不是PyWeb环境!')
     return
   }
-  await window.pywebview.api.set_brightness(info.brightness)
-  await window.pywebview.api.set_volume(info.volume / 100)
+  await window.pywebview.api.pc_set_brightness(info.brightness)
+  await window.pywebview.api.pc_set_volume(info.volume / 100)
 }
 // 鼠标调节滚动条
 function onWheel(key, event) {
@@ -143,10 +143,10 @@ async function toggleMute() {
     return
   }
   if (info.muted) {
-    await window.pywebview.api.mute(false)
+    await window.pywebview.api.pc_mute(false)
     info.muted = false
   } else {
-    await window.pywebview.api.mute(true)
+    await window.pywebview.api.pc_mute(true)
     info.muted = true
   }
 }

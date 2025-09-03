@@ -5,35 +5,10 @@
       <h3>定时任务</h3>
       <p>计算机名: <span class="highlight">{{ info.computerName }}</span></p>
       <p>电池: <span class="highlight">{{ info.battery }}</span></p>
-      <!-- 屏幕亮度 -->
-      <div class="slider-group" style="display: flex;flex-wrap: wrap;">
-        <label style="width: 100%; display: block;">屏幕亮度: <span class="highlight">{{ info.brightness }}%</span></label>
-        <input style="margin-top: 10px;"
-          type="range"
-          min="0"
-          max="100"
-          v-model="info.brightness"
-          @input="updateBrightness"
-          class="slider brightness"
-        />
-      </div>
+      <p>启动任务: <span class="highlight">
+        <el-button round size="mini" @click="startTask">启动</el-button>
+      </span></p>
 
-      <!-- 音量 -->
-      <div class="slider-group" style="display: flex;flex-wrap: wrap;">
-        <label style="width: 100%; display: block;">音量: <span class="highlight">{{ info.muted ? '静音' : parseInt(info.volume) + '%' }}</span></label>
-        <input style="margin-top: 10px;"
-          type="range"
-          min="0"
-          max="100"
-          v-model="info.volume"
-          @input="updateVolume"
-          class="slider volume"
-        />
-        <button class="mute-btn" @click="toggleMute" style="margin-top: -16px;">
-          <span v-if="info.muted">🔇</span>
-          <span v-else>🔊</span>
-        </button>
-      </div>
     </div>
 
     <!-- 性能配置 -->
@@ -95,22 +70,30 @@ const config = reactive({
   gpu: 'NVIDIA',
 })
 
+function startTask() {
+  if (!values.isPyWeb ) {
+    ElMessage.success('不是PyWeb环境!')
+    return
+  }
+  window.pywebview.api.task_restart()
+}
+
 async function refreshComputerInfo() {
   if (!values.isPyWeb ) {
     ElMessage.success('不是PyWeb环境!')
     return
   }
-  info.computerName = await window.pywebview.api.get_computer_name()
-  let batteryInfo = await window.pywebview.api.get_battery()
+  info.computerName = await window.pywebview.api.pc_get_computer_name()
+  let batteryInfo = await window.pywebview.api.pc_get_battery()
   console.log(batteryInfo)
   if (batteryInfo.exist) {
     info.battery = batteryInfo.percent + "%"
   } else {
     info.battery = "No battery detected"
   }
-  info.brightness = await window.pywebview.api.get_brightness()
-  info.volume = await window.pywebview.api.get_volume() * 100
-  info.muted = await window.pywebview.api.is_muted()
+  info.brightness = await window.pywebview.api.pc_get_brightness()
+  info.volume = await window.pywebview.api.pc_get_volume() * 100
+  info.muted = await window.pywebview.api.pc_is_muted()
 }
 
 
@@ -120,7 +103,7 @@ async function updateBrightness() {
     ElMessage.success('不是PyWeb环境!')
     return
   }
-  await window.pywebview.api.set_brightness(info.brightness)
+  await window.pywebview.api.pc_set_brightness(info.brightness)
 }
 
 // 更新音量
@@ -129,7 +112,7 @@ async function updateVolume() {
     ElMessage.success('不是PyWeb环境!')
     return
   }
-  await window.pywebview.api.set_volume(info.volume / 100)
+  await window.pywebview.api.pc_set_volume(info.volume / 100)
 }
 
 // 切换静音
@@ -139,10 +122,10 @@ async function toggleMute() {
     return
   }
   if (info.muted) {
-    await window.pywebview.api.mute(false)
+    await window.pywebview.api.pc_mute(false)
     info.muted = false
   } else {
-    await window.pywebview.api.mute(true)
+    await window.pywebview.api.pc_mute(true)
     info.muted = true
   }
 }

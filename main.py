@@ -52,8 +52,8 @@ def WebViewApp(ifCef=False):
     # 程序窗口大小
     initWidth = int(934)
     initHeight = int(650)
-    minWidth = int(600)
-    minHeight = int(420)
+    minWidth = int(400)
+    minHeight = int(300)
 
     # 创建窗口
     window = webview.create_window(
