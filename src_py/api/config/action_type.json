@@ -1,0 +1,17 @@
+[
+  {"id": "at1",
+    "name": "触发器类型",
+    "func": "desc",
+    "params": null
+  },
+  {"id": "at2",
+    "name": "修改屏幕亮度",
+    "func": "pc_set_brightness",
+    "params": ["int"],
+    "tips": "亮度范围: 0 - 100"
+  },
+  {"id": "a2", "name": "a2Name", "func": "func_2"},
+  {"id": "a3", "name": "a3Name", "func": "func_3"},
+  {"id": "a4", "name": "a4Name", "func": "func_4"},
+  {"id": "a5", "name": "a5Name", "func": "func_5"}
+]

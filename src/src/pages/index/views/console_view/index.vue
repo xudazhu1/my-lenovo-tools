@@ -44,7 +44,22 @@
       <p>性能模式: <span class="highlight">{{ config.mode }}</span></p>
       <p>键盘背光: <span class="highlight">{{ config.keyboardLight }}</span></p>
       <p>显卡: <span class="highlight">{{ config.gpu }}</span></p>
-      <p>音量: <span class="highlight">{{ info.volume }}%</span></p>
+      <p>刷新率: <span class="highlight">
+          <el-select
+              class="card-select"
+              size="mini"
+              @change="updateRefreshRate"
+              v-model="info.refresh_rate"
+              placeholder="请选择">
+            <el-option
+              v-for="item in info.pc_get_supported_refresh_rate"
+              :key="item"
+              :label="item + 'Hz'"
+              :value="item">
+            </el-option>
+          </el-select>
+        </span>
+      </p>
     </div>
 
     <!-- 定时任务 -->
@@ -88,6 +103,8 @@ const info = reactive({
   battery: "0", // 电池
   brightness: 0, // 屏幕亮度
   volume: 0, // 音量
+  refresh_rate: 60, // 刷新率
+  pc_get_supported_refresh_rate:[60],
   muted: false, // 静音
 })
 
@@ -96,6 +113,15 @@ const config = reactive({
   keyboardLight: '高亮度',
   gpu: 'NVIDIA',
 })
+
+async function updateRefreshRate(val) {
+  if (!values.isPyWeb ) {
+    ElMessage.success('不是PyWeb环境!')
+    return
+  }
+  await window.pywebview.api.pc_set_refresh_rate(val)
+}
+
 
 async function refreshComputerInfo() {
   if (!values.isPyWeb ) {
@@ -113,6 +139,8 @@ async function refreshComputerInfo() {
   info.brightness = await window.pywebview.api.pc_get_brightness()
   info.volume = await window.pywebview.api.pc_get_volume() * 100
   info.muted = await window.pywebview.api.pc_is_muted()
+  info.refresh_rate = await window.pywebview.api.pc_get_refresh_rate()
+  info.pc_get_supported_refresh_rate = await window.pywebview.api.pc_get_supported_refresh_rate()
 }
 
 
@@ -122,8 +150,11 @@ async function updateValue() {
     ElMessage.success('不是PyWeb环境!')
     return
   }
-  await window.pywebview.api.pc_set_brightness(info.brightness)
+  let setRes = await window.pywebview.api.pc_set_brightness(info.brightness)
   await window.pywebview.api.pc_set_volume(info.volume / 100)
+  // if (!setRes) {
+  //   ElMessage.success('亮度设置失败!')
+  // }
 }
 // 鼠标调节滚动条
 function onWheel(key, event) {
@@ -164,10 +195,16 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.card-select {
+  min-width: 100px;
+  min-height: 20px;
+  height: 20px;
+}
+
+
 .mute-btn {
   width: 23px;
 }
-
 
 .volume-line2 {
   display: flex;          /* 开启弹性布局 */
@@ -263,5 +300,13 @@ p {
 .highlight {
   color: #4a56e2;
   font-weight: 500;
+}
+</style>
+<style>
+.card-select .el-select__wrapper {
+  min-width: 100px;
+  min-height: 20px;
+  height: 20px;
+  border-radius: 10px;
 }
 </style>

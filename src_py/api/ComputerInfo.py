@@ -13,6 +13,8 @@ from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from win32com.client import VARIANT
 
+from src_py.api import MonitorUtils
+
 
 class ComputerInfo:
     def __init__(self):
@@ -22,6 +24,18 @@ class ComputerInfo:
         self.volume = cast(interface, POINTER(IAudioEndpointVolume))
         # 连接到 root\wmi 命名空间
         self.wmi_interface = wmi.WMI(namespace='root\\wmi')
+
+    # 获取 刷新率
+    def set_refresh_rate(self, value):
+        return MonitorUtils.set_refresh_rate(None, value)
+
+    # 获取 刷新率
+    def get_refresh_rate(self):
+        return MonitorUtils.get_current_refresh_rate()
+
+    # 获取 设备支持的 刷新率 列表
+    def get_supported_refresh_rate(self):
+        return MonitorUtils.get_supported_refresh_rates()
 
     # 获取计算机名
     def get_computer_name(self):
@@ -79,29 +93,33 @@ class ComputerInfo:
             return self.get_brightness_old()
 
     def set_brightness(self, value: int) -> bool:
-        """通过 WMI 调整亮度（0-100），避免 PowerShell"""
-        value = max(0, min(100, int(value)))
+        try:
+            """通过 WMI 调整亮度（0-100），避免 PowerShell"""
+            value = max(0, min(100, int(value)))
 
-        # 连接到 root\wmi
-        loc = win32com.client.Dispatch("WbemScripting.SWbemLocator")
-        svc = loc.ConnectServer(".", "root\\wmi")
+            # 连接到 root\wmi
+            loc = win32com.client.Dispatch("WbemScripting.SWbemLocator")
+            svc = loc.ConnectServer(".", "root\\wmi")
 
-        # 只对内置屏幕有效；外接显示器通常不支持这个类
-        items = svc.ExecQuery("SELECT * FROM WmiMonitorBrightnessMethods")
-        ok = False
+            # 只对内置屏幕有效；外接显示器通常不支持这个类
+            items = svc.ExecQuery("SELECT * FROM WmiMonitorBrightnessMethods")
+            ok = False
 
-        for obj in items:
-            # 关键：从对象的 Methods_ 里拿到方法的入参模板，再赋值
-            in_params = obj.Methods_("WmiSetBrightness").InParameters.SpawnInstance_()
-            in_params.Properties_.Item("Timeout").Value = 1  # UINT32
-            in_params.Properties_.Item("Brightness").Value = value  # UINT8 (0-100)
+            for obj in items:
+                # 关键：从对象的 Methods_ 里拿到方法的入参模板，再赋值
+                in_params = obj.Methods_("WmiSetBrightness").InParameters.SpawnInstance_()
+                in_params.Properties_.Item("Timeout").Value = 1  # UINT32
+                in_params.Properties_.Item("Brightness").Value = value  # UINT8 (0-100)
 
-            # 用 ExecMethod_ 调用（不要直接 obj.WmiSetBrightness(...)）
-            obj.ExecMethod_("WmiSetBrightness", in_params)
-            ok = True
+                # 用 ExecMethod_ 调用（不要直接 obj.WmiSetBrightness(...)）
+                obj.ExecMethod_("WmiSetBrightness", in_params)
+                ok = True
 
-        return ok
-
+            return ok
+        except Exception as e:
+            print("尝试老的设置亮度函数! set_brightness_old " + str(value))
+            self.set_brightness_old(value)
+            return False
 
     # 设置屏幕亮度 (0-100) 新的 解决独显模式下不生效的问题
     def set_brightness_old2(self, value: int):
@@ -150,8 +168,8 @@ class ComputerInfo:
     # 模拟键盘输入 (虚拟键码)
     def _send_vk(self, key_code):
         user32 = windll.user32
-        user32.keybd_event(key_code, 0, 0, 0)        # 按下
-        user32.keybd_event(key_code, 0, 2, 0)        # 松开
+        user32.keybd_event(key_code, 0, 0, 0)  # 按下
+        user32.keybd_event(key_code, 0, 2, 0)  # 松开
 
     def play_pause(self):
         self._send_vk(0xB3)  # VK_MEDIA_PLAY_PAUSE
@@ -170,8 +188,10 @@ if __name__ == "__main__":
     print("亮度:", pc.get_brightness())
     print("音量:", pc.get_volume())
     print("是否静音:", pc.is_muted())
+    print("现在的刷新率:", pc.get_refresh_rate())
+    print("支持的刷新率列表:", pc.get_supported_refresh_rate())
 
-    pc.set_brightness(83)
+    # pc.set_brightness(74)
 
     # 示例
     # pc.mute(True)        # 静音
