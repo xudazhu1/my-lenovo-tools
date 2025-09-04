@@ -35,8 +35,8 @@
           {"keyboard": "d"}
         ]}},
         {"loop": {"count": 0, "actions": [
-          {"keyboard": "e"},
-          {"wait": 0.05}
+          {"keyboard": "e", "hold": 2},
+          {"wait": 0.001}
         ]}}
       ]
     },

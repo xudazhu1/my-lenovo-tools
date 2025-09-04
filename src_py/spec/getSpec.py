@@ -128,7 +128,8 @@ exe = EXE(pyz,
         target_arch=None,
         codesign_identity=None,
         entitlements_file=None,
-        icon=icoPath)
+        icon=icoPath,
+        uac_admin=True)
 
 '''
 
@@ -150,7 +151,8 @@ exe = EXE(pyz,
         target_arch=None,
         codesign_identity=None,
         entitlements_file=None,
-        icon=icoPath)
+        icon=icoPath,
+        uac_admin=True)
 coll = COLLECT(exe,
             a.binaries,
             a.zipfiles,

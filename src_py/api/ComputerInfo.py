@@ -3,9 +3,11 @@ import socket
 import subprocess
 
 import psutil
+import pythoncom
 import screen_brightness_control as sbc
 from ctypes import cast, POINTER, windll, c_uint, sizeof, byref
 
+import win32com
 import wmi
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
@@ -59,26 +61,54 @@ class ComputerInfo:
         """获取当前屏幕亮度 (0-100)"""
         cmd = [
             "powershell",
+            "-NoProfile",  # 不加载用户配置，加快执行速度
+            "-WindowStyle", "Hidden",  # 隐藏窗口
             "-Command",
             "(Get-WmiObject -Namespace root\\wmi -Class WmiMonitorBrightness).CurrentBrightness"
         ]
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                creationflags=subprocess.CREATE_NO_WINDOW  # 关键参数
+            )
             return int(result.stdout.strip())
         except Exception as e:
             return self.get_brightness_old()
 
-    # 设置屏幕亮度 (0-100) 新的 解决独显模式下不生效的问题
     def set_brightness(self, value: int):
+        try:
+            wmi = win32com.client.GetObject("winmgmts:\\\\.\\root\\wmi")
+            methods = wmi.ExecQuery("SELECT * FROM WmiMonitorBrightnessMethods")
+            for method in methods:
+                # 参数 1: 超时时间 (uint32)
+                # 参数 2: 亮度值 (uint8)
+                timeout = pythoncom.VARIANT(pythoncom.VT_UI4, 1)
+                brightness = pythoncom.VARIANT(pythoncom.VT_UI1, int(value))
+                method.WmiSetBrightness(timeout, brightness)
+        except Exception as e:
+            print("调节失败:", e)
+
+
+    # 设置屏幕亮度 (0-100) 新的 解决独显模式下不生效的问题
+    def set_brightness_old2(self, value: int):
         """设置屏幕亮度 (0-100)"""
         cmd = [
             "powershell",
+            "-NoProfile",  # 不加载用户配置，加快执行速度
+            "-WindowStyle", "Hidden",  # 隐藏窗口
             "-Command",
             f"$methods = Get-WmiObject -Namespace root\\wmi -Class WmiMonitorBrightnessMethods; "
             f"$methods.WmiSetBrightness(1, {value})"
         ]
         try:
-            subprocess.run(cmd, capture_output=True, text=True)
+            subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                creationflags=subprocess.CREATE_NO_WINDOW  # 关键参数
+            )
         except Exception as e:
             return self.set_brightness_old(value)
 

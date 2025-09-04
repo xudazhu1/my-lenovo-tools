@@ -8,7 +8,6 @@
       <p>启动任务: <span class="highlight">
         <el-button round size="mini" @click="startTask">启动</el-button>
       </span></p>
-
     </div>
 
     <!-- 性能配置 -->

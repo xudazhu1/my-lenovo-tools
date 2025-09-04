@@ -30,7 +30,7 @@ def perform_actions(actions, macro_name):
         # 键盘
         elif "keyboard" in act:
             key = act["keyboard"]
-            hold = act.get("hold", 0.05)
+            hold = act.get("hold", 0.0005)
             try:
                 keyboard_ctrl.press(key)
                 time.sleep(hold)
@@ -41,7 +41,7 @@ def perform_actions(actions, macro_name):
         # 鼠标
         elif "mouse" in act:
             btn = act["mouse"]
-            hold = act.get("hold", 0.05)
+            hold = act.get("hold", 0.0005)
             amount = act.get("amount", 1)
             direction = act.get("direction", "vertical")
 
