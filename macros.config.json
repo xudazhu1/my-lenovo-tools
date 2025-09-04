@@ -43,7 +43,7 @@
     {
       "name": "鸣潮视角",
       "programs": ["Client-Win64-Shipping.exe"],
-      "hotkey": ["w"],
+      "hotkey": ["w","a","s","d"],
       "stop_key": "<esc>",
       "actions": [
         {"loop": {"count": 3, "actions": [

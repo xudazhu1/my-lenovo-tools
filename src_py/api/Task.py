@@ -11,6 +11,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.memory import MemoryJobStore
 from collections import defaultdict
 
+from src_py.api.ComputerInfo import ComputerInfo
+
 
 # ------------------ 动作函数 ------------------
 def func_1():
@@ -118,12 +120,24 @@ class EventListener:
                 try:
                     event = watcher()
                     event_type = event.EventType
-                    if event_type == 10:
-                        for handler in self.power_handlers.get("plugged", []):
-                            handler("AC Power Plugged")
-                    elif event_type == 11:
-                        for handler in self.power_handlers.get("unplugged", []):
-                            handler("AC Power Unplugged")
+                    # if event_type == 10:
+                    #     for handler in self.power_handlers.get("plugged", []):
+                    #         handler("AC Power Plugged")
+                    # elif event_type == 11:
+                    #     for handler in self.power_handlers.get("unplugged", []):
+                    #         handler("AC Power Unplugged")
+                    # 不使用这个方法判断 直接拿电池状态
+                    try:
+                        battery = psutil.sensors_battery()
+                        if battery is not None:
+                            if battery.power_plugged is True:
+                                for handler in self.power_handlers.get("plugged", []):
+                                    handler("电源插入事件!")
+                            else:
+                                for handler in self.power_handlers.get("unplugged", []):
+                                    handler("电源拔出事件!")
+                    except Exception as e:
+                        print(f"电源事件收到了,但是发生错误?: {e}")
                 except Exception as e:
                     print(f"电源事件监听错误: {e}")
                     time.sleep(5)

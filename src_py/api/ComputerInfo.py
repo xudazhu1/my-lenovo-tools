@@ -11,6 +11,7 @@ import win32com
 import wmi
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+from win32com.client import VARIANT
 
 
 class ComputerInfo:
@@ -77,18 +78,29 @@ class ComputerInfo:
         except Exception as e:
             return self.get_brightness_old()
 
-    def set_brightness(self, value: int):
-        try:
-            wmi = win32com.client.GetObject("winmgmts:\\\\.\\root\\wmi")
-            methods = wmi.ExecQuery("SELECT * FROM WmiMonitorBrightnessMethods")
-            for method in methods:
-                # 参数 1: 超时时间 (uint32)
-                # 参数 2: 亮度值 (uint8)
-                timeout = pythoncom.VARIANT(pythoncom.VT_UI4, 1)
-                brightness = pythoncom.VARIANT(pythoncom.VT_UI1, int(value))
-                method.WmiSetBrightness(timeout, brightness)
-        except Exception as e:
-            print("调节失败:", e)
+    def set_brightness(self, value: int) -> bool:
+        """通过 WMI 调整亮度（0-100），避免 PowerShell"""
+        value = max(0, min(100, int(value)))
+
+        # 连接到 root\wmi
+        loc = win32com.client.Dispatch("WbemScripting.SWbemLocator")
+        svc = loc.ConnectServer(".", "root\\wmi")
+
+        # 只对内置屏幕有效；外接显示器通常不支持这个类
+        items = svc.ExecQuery("SELECT * FROM WmiMonitorBrightnessMethods")
+        ok = False
+
+        for obj in items:
+            # 关键：从对象的 Methods_ 里拿到方法的入参模板，再赋值
+            in_params = obj.Methods_("WmiSetBrightness").InParameters.SpawnInstance_()
+            in_params.Properties_.Item("Timeout").Value = 1  # UINT32
+            in_params.Properties_.Item("Brightness").Value = value  # UINT8 (0-100)
+
+            # 用 ExecMethod_ 调用（不要直接 obj.WmiSetBrightness(...)）
+            obj.ExecMethod_("WmiSetBrightness", in_params)
+            ok = True
+
+        return ok
 
 
     # 设置屏幕亮度 (0-100) 新的 解决独显模式下不生效的问题
