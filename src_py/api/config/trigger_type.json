@@ -1,7 +1,7 @@
 [
   {
     "id": "t1",
-    "name": "稍后执行: 1秒后",
+    "name": "稍后执行(秒)",
     "type": "delay",
     "params": {
       "seconds": 1

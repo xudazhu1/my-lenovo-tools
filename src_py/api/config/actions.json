@@ -1,7 +1,47 @@
 [
-  {"id": "a1", "name": "a1Name", "func": "func_1"},
-  {"id": "a2", "name": "a2Name", "func": "func_2"},
-  {"id": "a3", "name": "a3Name", "func": "func_3"},
-  {"id": "a4", "name": "a4Name", "func": "func_4"},
-  {"id": "a5", "name": "a5Name", "func": "func_5"}
+  {
+    "id": "a1",
+    "name": "调整分辨率: 60Hz",
+    "desc": "调整分辨率: 60Hz",
+    "func": "at8",
+    "param": [
+      60
+    ]
+  },
+  {
+    "id": "a2",
+    "name": "调整分辨率: 120Hz",
+    "desc": "调整分辨率: 120Hz",
+    "func": "at8",
+    "param": [
+      120
+    ]
+  },
+  {
+    "id": "a3",
+    "name": "修改屏幕亮度: 40",
+    "desc": "修改屏幕亮度: 40",
+    "func": "at2",
+    "param": [
+      40
+    ]
+  },
+  {
+    "id": "a4",
+    "name": "调整静音: 静音",
+    "desc": "调整静音: 静音",
+    "func": "at5",
+    "param": [
+      true
+    ]
+  },
+  {
+    "id": "a5",
+    "name": "启动触发独显模式的程序!",
+    "desc": "启动程序: D:\\winTools\\lenovoKeyboardTools\\LaunchGPU.exe",
+    "func": "at3",
+    "param": [
+      "D:\\winTools\\lenovoKeyboardTools\\LaunchGPU.exe"
+    ]
+  }
 ]

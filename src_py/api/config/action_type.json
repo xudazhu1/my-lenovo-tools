@@ -2,7 +2,8 @@
   {"id": "at1",
     "name": "触发器类型",
     "func": "desc",
-    "params": null
+    "params": ["string"],
+    "tips": "示范动作, 我将发送一条通知"
   },
   {"id": "at2",
     "name": "修改屏幕亮度",
@@ -10,8 +11,48 @@
     "params": ["int"],
     "tips": "亮度范围: 0 - 100"
   },
-  {"id": "a2", "name": "a2Name", "func": "func_2"},
-  {"id": "a3", "name": "a3Name", "func": "func_3"},
-  {"id": "a4", "name": "a4Name", "func": "func_4"},
-  {"id": "a5", "name": "a5Name", "func": "func_5"}
+  {"id": "at3",
+    "name": "启动程序",
+    "func": "task_start_exe",
+    "params": ["file"],
+    "tips": "选择你想要启动的程序, 如果带参数请自己包装成bat"
+  },
+  {"id": "at4",
+    "name": "结束程序",
+    "func": "task_stop_exe",
+    "params": ["file"],
+    "tips": "将使用管理员权限结束这个程序!(不一定成功)"
+  },
+  {"id": "at5",
+    "name": "调整音量",
+    "func": "pc_set_volume",
+    "params": ["int"],
+    "tips": "亮度范围: 0 - 100"
+  },
+  {"id": "at6",
+    "name": "调整静音",
+    "func": "pc_mute_true",
+    "params": ["selector"],
+    "selector": ["静音", "取消静音"],
+    "tips": "请选择是否静音! "
+  },
+  {"id": "at7",
+    "name": "调整性能模式",
+    "params": ["selector"],
+    "selector": ["节能", "只能", "野兽"],
+    "tips": "请选择性能模式!"
+  },
+  {"id": "at8",
+    "name": "调整刷新率",
+    "params": ["selector_func"],
+    "selector_func": "pc_get_supported_refresh_rate",
+    "tips": "请选择刷新率!"
+  },
+  {"id": "at10",
+    "name": "执行宏动作",
+    "params": ["selector_func"],
+    "selector_func": "macros_get_all_names",
+    "tips": "执行一次该宏的动作, 不是打开宏开关哦!"
+  },
+  {"id": "a2", "name": "a2Name", "func": "func_2"}
 ]

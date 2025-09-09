@@ -188,9 +188,10 @@ class EventListener:
 class TaskManager:
     def __init__(self):
         self.scheduler = None
-        self.triggers = {}
-        self.actions = {}
-        self.relations = {}
+        self.triggers = []
+        self.actions = []
+        self.action_type = []
+        self.relations = []
         self.event_listener = EventListener()
         self._running = False
         atexit.register(self._cleanup)
@@ -213,6 +214,8 @@ class TaskManager:
         """加载配置文件"""
         script_dir = os.path.dirname(os.path.abspath(__file__))
         try:
+            with open(os.path.join(script_dir, "config", "action_type.json"), "r", encoding="utf-8") as f:
+                self.action_type = json.load(f) # 可执行活动
             with open(os.path.join(script_dir, "config", "triggers.json"), "r", encoding="utf-8") as f:
                 self.triggers = json.load(f)
             with open(os.path.join(script_dir, "config", "actions.json"), "r", encoding="utf-8") as f:
@@ -228,6 +231,8 @@ class TaskManager:
         """保存配置文件"""
         script_dir = os.path.dirname(os.path.abspath(__file__))
         try:
+            with open(os.path.join(script_dir, "config", "action_type.json"), "w", encoding="utf-8") as f:
+                json.dump(self.action_type, f, ensure_ascii=False, indent=2)
             with open(os.path.join(script_dir, "config", "triggers.json"), "w", encoding="utf-8") as f:
                 json.dump(self.triggers, f, ensure_ascii=False, indent=2)
             with open(os.path.join(script_dir, "config", "actions.json"), "w", encoding="utf-8") as f:
@@ -242,13 +247,14 @@ class TaskManager:
     def get_config(self):
         """获取当前配置"""
         return {
+            "action_type": self.action_type,
             "triggers": self.triggers,
             "actions": self.actions,
             "relations": self.relations
         }
 
     def update_config(self, triggers=None, actions=None, relations=None):
-        """更新配置"""
+        """更新配置 action_type 是内置的 不用更新 """
         if triggers is not None:
             self.triggers = triggers
         if actions is not None:
@@ -362,7 +368,7 @@ class TaskManager:
                     if action["id"] == action_id:
                         action_info = action
                         break
-                func_name = action_info["func"]
+                func_name = action_info["func"] # todo 这里要改为获取 action_type_id 和param
                 params = action_info.get("params", {})
 
                 if func_name == "func_1":
