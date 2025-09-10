@@ -17,7 +17,7 @@ addRoutes(router, [
       },
       {
         path: '/clock',
-        component: () => import('@p-index/views/clock/index.vue'),
+        component: () => import('@p-index/views/task/index.vue'),
       },
       {
         path: '/macros',

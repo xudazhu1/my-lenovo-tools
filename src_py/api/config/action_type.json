@@ -38,18 +38,21 @@
   },
   {"id": "at7",
     "name": "调整性能模式",
+    "func": "pc_set_its_mode",
     "params": ["selector"],
-    "selector": ["节能", "只能", "野兽"],
+    "selector": ["节能", "智能", "野兽"],
     "tips": "请选择性能模式!"
   },
   {"id": "at8",
     "name": "调整刷新率",
+    "func": "pc_set_refresh_rate",
     "params": ["selector_func"],
     "selector_func": "pc_get_supported_refresh_rate",
     "tips": "请选择刷新率!"
   },
   {"id": "at10",
     "name": "执行宏动作",
+    "func": "exe_macros",
     "params": ["selector_func"],
     "selector_func": "macros_get_all_names",
     "tips": "执行一次该宏的动作, 不是打开宏开关哦!"

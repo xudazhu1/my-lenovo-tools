@@ -1,59 +1,61 @@
 [
   {
     "id": "t1",
-    "name": "稍后执行: 1秒后",
+    "name": "稍后执行(秒): 1",
+    "desc": "稍后执行(秒): 1",
     "type": "delay",
-    "params": {
-      "seconds": 1
-    }
+    "params": [
+      1
+    ]
   },
   {
     "id": "t2",
-    "name": "t2Name",
+    "name": "Cron任务: ",
+    "desc": "Cron任务: 每周6,7的早上8点10分10秒",
     "type": "cron",
-    "params": {
-      "hour": 8,
-      "minute": 0
-    }
+    "params": [
+      "0 10 8 * * 6,7 *"
+    ]
   },
   {
     "id": "t3",
-    "name": "t3Name",
+    "name": "电源切换时: 插入",
     "type": "power",
-    "params": {
-      "event_type": "both"
-    }
+    "params": [
+      "插入"
+    ]
   },
   {
     "id": "t4",
-    "name": "t4Name",
-    "type": "process_start",
-    "params": {
-      "process_name": "Notepad.exe"
-    }
+    "name": "电源切换时: 拔出",
+    "type": "power",
+    "params": [
+      "拔出"
+    ]
   },
   {
     "id": "t5",
-    "name": "t5Name",
-    "type": "process_stop",
-    "params": {
-      "process_name": "Notepad.exe"
-    }
+    "name": "稍后执行(秒): 5",
+    "desc": "稍后执行(秒): 5",
+    "type": "delay",
+    "params": [
+      5
+    ]
   },
   {
     "id": "t6",
-    "name": "t6Name",
+    "name": "当程序启动: Client-Win64-Shipping.exe",
     "type": "process_start",
-    "params": {
-      "process_name": "chrome.exe"
-    }
+    "params": [
+      "Client-Win64-Shipping.exe"
+    ]
   },
   {
     "id": "t7",
-    "name": "t7Name",
+    "name": "当程序退出: Client-Win64-Shipping.exe",
     "type": "process_stop",
-    "params": {
-      "process_name": "chrome.exe"
-    }
+    "params": [
+      "Client-Win64-Shipping.exe"
+    ]
   }
 ]

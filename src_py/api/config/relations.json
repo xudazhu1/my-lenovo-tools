@@ -1,9 +1,17 @@
 [
-  {"trigger_id": "t1", "action_id": "a1"},
-  {"trigger_id": "t2", "action_id": "a2"},
-  {"trigger_id": "t3", "action_id": "a3"},
-  {"trigger_id": "t4", "action_id": "a4"},
-  {"trigger_id": "t5", "action_id": "a5"},
-  {"trigger_id": "t6", "action_id": "a4"},
-  {"trigger_id": "t7", "action_id": "a5"}
+  {
+    "trigger_id": "t1",
+    "action_id": "a1",
+    "desc": "稍后执行(秒): 1; 调整分辨率: 60Hz"
+  },
+  {
+    "trigger_id": "t1",
+    "action_id": "a3",
+    "desc": "稍后执行(秒): 1; 修改屏幕亮度: 40"
+  },
+  {
+    "trigger_id": "t5",
+    "action_id": "a2",
+    "desc": "稍后执行(秒): 5; 调整分辨率: 120Hz"
+  }
 ]

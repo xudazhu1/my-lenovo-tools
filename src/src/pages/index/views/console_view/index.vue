@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <!-- 基本状态 -->
-    <div class="card">
+    <div class="card bg-normal">
       <h3>基本状态</h3>
       <p>计算机名: <span class="highlight">{{ info.computerName }}</span></p>
       <p>电池: <span class="highlight">{{ info.battery }}</span></p>
@@ -39,7 +39,7 @@
     </div>
 
     <!-- 性能配置 -->
-    <div class="card">
+    <div class="card bg-normal">
       <h3>性能配置</h3>
       <p>性能模式: <span class="highlight">{{ config.mode }}</span></p>
       <p>键盘背光: <span class="highlight">{{ config.keyboardLight }}</span></p>
@@ -63,7 +63,7 @@
     </div>
 
     <!-- 定时任务 -->
-    <div class="card">
+    <div class="card bg-normal">
       <h3>定时任务</h3>
       <p>30分钟后: <span class="highlight">音量调节到0%</span></p>
       <p>电源断开时: <span class="highlight">刷新率60Hz</span></p>
@@ -72,7 +72,7 @@
     </div>
 
     <!-- 宏 -->
-    <div class="card">
+    <div class="card bg-normal">
       <h3>宏</h3>
       <p>FN&Q: <span class="highlight">狮鹫起飞</span></p>
       <p>W|A|S|D: <span class="highlight">滚轮向下10</span></p>
@@ -81,7 +81,7 @@
     </div>
 
     <!-- 底部 -->
-    <div class="card full">
+    <div class="card full bg-normal">
       <p>在线服务: <span class="highlight">在线(easy-x)</span></p>
       <p>蓝牙服务: <span class="highlight">已连接(GalaxyS24)</span></p>
     </div>
@@ -255,18 +255,17 @@ onMounted(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  padding: 16px;
+  padding: .5rem;
   font-family: "Segoe UI", sans-serif;
 }
 
 .card {
-  border: 1px solid #ddd;
+  border: 0 solid #ddd;
   border-radius: 12px;
-  padding: 12px 16px;
-  background: #fff;
+  padding: .5rem .5rem;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   position: relative;
-  flex: 1 1 calc(33.33% - 16px); /* 默认每行3个卡片 */
+  flex: 1 1 calc(33.33% - .5rem); /* 默认每行3个卡片 */
   min-width: 220px;
 }
 /* 小屏幕时，每行只显示一个卡片 */

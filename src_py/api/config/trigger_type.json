@@ -1,59 +1,33 @@
 [
   {
-    "id": "t1",
+    "id": "tt1",
     "name": "稍后执行(秒)",
     "type": "delay",
-    "params": {
-      "seconds": 1
-    }
+    "params": ["int"]
   },
   {
-    "id": "t2",
-    "name": "t2Name",
+    "id": "tt2",
+    "name": "Cron任务",
     "type": "cron",
-    "params": {
-      "hour": 8,
-      "minute": 0
-    }
+    "params": ["cron"]
   },
   {
-    "id": "t3",
-    "name": "t3Name",
+    "id": "tt3",
+    "name": "电源切换时",
     "type": "power",
-    "params": {
-      "event_type": "both"
-    }
+    "params": ["selector"],
+    "selector": ["插入", "拔出"]
   },
   {
     "id": "t4",
-    "name": "t4Name",
+    "name": "当程序启动",
     "type": "process_start",
-    "params": {
-      "process_name": "Notepad.exe"
-    }
+    "params": ["file"]
   },
   {
-    "id": "t5",
-    "name": "t5Name",
+    "id": "tt5",
+    "name": "当程序退出",
     "type": "process_stop",
-    "params": {
-      "process_name": "Notepad.exe"
-    }
-  },
-  {
-    "id": "t6",
-    "name": "t6Name",
-    "type": "process_start",
-    "params": {
-      "process_name": "chrome.exe"
-    }
-  },
-  {
-    "id": "t7",
-    "name": "t7Name",
-    "type": "process_stop",
-    "params": {
-      "process_name": "chrome.exe"
-    }
+    "params": ["file"]
   }
 ]

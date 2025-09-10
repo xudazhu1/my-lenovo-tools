@@ -1,5 +1,6 @@
 import os
 import json
+import subprocess
 import time
 import psutil
 import pythoncom
@@ -13,6 +14,30 @@ from collections import defaultdict
 
 from src_py.api.ComputerInfo import ComputerInfo
 
+
+# 方法2：如果不想自己写 parser，可以用 croniter 库
+from croniter import croniter
+def cron_to_aps_params(expr: str) -> dict:
+    """
+    将 5/6/7 字段 cron 表达式 转换为 apscheduler.CronTrigger 参数
+    支持:
+    - 5字段 (Linux): 分 时 日 月 周
+    - 6字段 (Linux): 秒 分 时 日 月 周
+    - 7字段 (Quartz): 秒 分 时 日 月 周 年
+    """
+    fields = expr.split()
+    length = len(fields)
+
+    if length == 5:  # Linux 常见
+        keys = ["minute", "hour", "day", "month", "day_of_week"]
+    elif length == 6:  # Linux 带秒
+        keys = ["second", "minute", "hour", "day", "month", "day_of_week"]
+    elif length == 7:  # Quartz 风格
+        keys = ["second", "minute", "hour", "day", "month", "day_of_week", "year"]
+    else:
+        raise ValueError(f"不支持的字段数: {length} (必须是5/6/7)，表达式: {expr}")
+
+    return dict(zip(keys, fields))
 
 # ------------------ 动作函数 ------------------
 def func_1():
@@ -191,6 +216,7 @@ class TaskManager:
         self.triggers = []
         self.actions = []
         self.action_type = []
+        self.trigger_type = []
         self.relations = []
         self.event_listener = EventListener()
         self._running = False
@@ -200,6 +226,12 @@ class TaskManager:
         """清理资源"""
         if self._running:
             self.stop()
+
+    def _get_by_id(self, arr, id):
+        for item in arr:
+            if item.id == id:
+                return item
+        return None
 
     def _create_scheduler(self):
         """创建新的调度器实例"""
@@ -214,6 +246,8 @@ class TaskManager:
         """加载配置文件"""
         script_dir = os.path.dirname(os.path.abspath(__file__))
         try:
+            with open(os.path.join(script_dir, "config", "trigger_type.json"), "r", encoding="utf-8") as f:
+                self.trigger_type = json.load(f) # 可执行活动
             with open(os.path.join(script_dir, "config", "action_type.json"), "r", encoding="utf-8") as f:
                 self.action_type = json.load(f) # 可执行活动
             with open(os.path.join(script_dir, "config", "triggers.json"), "r", encoding="utf-8") as f:
@@ -231,6 +265,8 @@ class TaskManager:
         """保存配置文件"""
         script_dir = os.path.dirname(os.path.abspath(__file__))
         try:
+            with open(os.path.join(script_dir, "config", "trigger_type.json"), "w", encoding="utf-8") as f:
+                json.dump(self.trigger_type, f, ensure_ascii=False, indent=2)
             with open(os.path.join(script_dir, "config", "action_type.json"), "w", encoding="utf-8") as f:
                 json.dump(self.action_type, f, ensure_ascii=False, indent=2)
             with open(os.path.join(script_dir, "config", "triggers.json"), "w", encoding="utf-8") as f:
@@ -247,6 +283,7 @@ class TaskManager:
     def get_config(self):
         """获取当前配置"""
         return {
+            "trigger_type": self.action_type,
             "action_type": self.action_type,
             "triggers": self.triggers,
             "actions": self.actions,
@@ -323,82 +360,133 @@ class TaskManager:
         """检查任务管理器是否运行中"""
         return self._running
 
-    def _register_triggers(self):
-        """注册所有触发器"""
-        # 清除所有现有作业
-        if self.scheduler.running:
-            self.scheduler.remove_all_jobs()
-
-        for trig in self.triggers:
-            trig_id = trig["id"]
-            trig_name = trig["name"]
-            trig_type = trig["type"]
-
-            if trig_type == "delay":
-                run_time = datetime.now() + timedelta(**trig["params"])
-                self.scheduler.add_job(
-                    self._run_actions, "date",
-                    run_date=run_time, args=[trig_id], id=trig_id
-                )
-
-            elif trig_type == "cron":
-                self.scheduler.add_job(
-                    self._run_actions, "cron",
-                    args=[trig_id], id=trig_id, **trig["params"]
-                )
-
-            elif trig_type == "power":
-                self._register_power_event(trig_id, trig.get("params", {}))
-
-            elif trig_type == "process_start":
-                self._register_process_start_monitor(trig_id, trig.get("params", {}))
-
-            elif trig_type == "process_stop":
-                self._register_process_stop_monitor(trig_id, trig.get("params", {}))
-
     def _run_actions(self, trig_id, *args):
         """执行触发器对应的动作"""
         for rel in self.relations:
             if rel["trigger_id"] == trig_id:
                 action_id = rel["action_id"]
                 # action_info = self.actions[action_id]
-                action_info = {}
+                action_info = self._get_by_id(self.actions, action_id)
                 # 查询符合action_id的动作
-                for action in self.actions:
-                    if action["id"] == action_id:
-                        action_info = action
-                        break
-                func_name = action_info["func"] # todo 这里要改为获取 action_type_id 和param
-                params = action_info.get("params", {})
+                func_id = action_info["func"] # todo 这里要改为获取 action_type_id 和param
+                param = action_info["param"][0]
+                # 根据 action_info 获取到的 func_id param 去 action_type里找执行逻辑
+                action_type = self._get_by_id(self.action_type, func_id)
+                # 从 action_type 获取func
+                func_name = action_type["func"]
+                if func_name == "desc":
+                    print("我是示范动作! 我被调用了!")
+                elif func_name == "pc_set_brightness":
+                    ComputerInfo().set_brightness(param)
+                elif func_name == "pc_set_volume":
+                    ComputerInfo().set_volume(param)
+                elif func_name == "pc_set_refresh_rate":
+                    ComputerInfo().set_refresh_rate(param)
+                elif func_name == "pc_mute_true":
+                    ComputerInfo().mute(param == "静音")
+                elif func_name == "pc_set_its_mode":
+                    print("调整性能模式: " + param)
+                elif func_name == "exe_macros":
+                    print("启动宏: " + param)
+                elif func_name == "task_start_exe":
+                    print("启动子程序: " + param)
+                    # subprocess.run([DEVCON_PATH, "enable", device_id], check=True)
+                    subprocess.Popen(param)
+                elif func_name == "task_stop_exe":
+                    # 再结束所有 LaunchGPU.exe 的进程 todo 可能要改为使用管理员权限结束指定任务
+                    target_name = param
+                    time.sleep(1)
+                    for proc in psutil.process_iter(['pid', 'name']):
+                        try:
+                            if proc.info['name'] and proc.info['name'].lower() == target_name.lower():
+                                print(f"Terminating PID {proc.pid} - {proc.info['name']}")
+                                proc.terminate()
+                                proc.wait(timeout=5)
+                        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                            pass
 
-                if func_name == "func_1":
-                    func_1()
                 elif func_name == "func_2":
-                    func_2()
-                elif func_name == "func_3":
-                    func_3(*args if args else ["unknown"])
-                elif func_name == "func_4":
-                    process_name = args[0] if args else "unknown"
-                    func_4(process_name)
-                elif func_name == "func_5":
-                    process_name = args[0] if args else "unknown"
-                    func_5(process_name)
+                    func_5(param)
+
+    def _register_triggers(self):
+        """注册所有触发器"""
+        # 清除所有现有作业
+        if self.scheduler.running:
+            self.scheduler.remove_all_jobs()
+        # 改为 self.relations 里面取触发器!
+        for relation in self.relations:
+            trig_id = relation["trigger_id"]
+            relation_name = relation["desc"]
+            trig = self._get_by_id(self.triggers, trig_id)
+            trig_type = trig["type"]
+            params = trig["params"]
+
+            if trig_type == "delay":
+                run_time = datetime.now() + timedelta(seconds=params[0]) # 延时任务 取秒数
+                self.scheduler.add_job(
+                    self._run_actions, "date",
+                    run_date=run_time, args=[trig_id], id=trig_id
+                )
+
+            elif trig_type == "cron":
+                params_cron = cron_to_aps_params(params[0]) # 格式化 cron表达式
+                self.scheduler.add_job(
+                    self._run_actions, "cron",
+                    args=[trig_id], id=trig_id, **params_cron
+                )
+
+            elif trig_type == "power":
+                self._register_power_event(trig_id, params[0])
+
+            elif trig_type == "process_start":
+                self._register_process_start_monitor(trig_id, params[0])
+
+            elif trig_type == "process_stop":
+                self._register_process_stop_monitor(trig_id, params[0])
+
+        # for trig in self.triggers:
+        #     trig_id = trig["id"]
+        #     trig_name = trig["name"]
+        #     trig_type = trig["type"]
+        #
+        #     if trig_type == "delay":
+        #         run_time = datetime.now() + timedelta(**trig["params"])
+        #         self.scheduler.add_job(
+        #             self._run_actions, "date",
+        #             run_date=run_time, args=[trig_id], id=trig_id
+        #         )
+        #
+        #     elif trig_type == "cron":
+        #         self.scheduler.add_job(
+        #             self._run_actions, "cron",
+        #             args=[trig_id], id=trig_id, **trig["params"]
+        #         )
+        #
+        #     elif trig_type == "power":
+        #         self._register_power_event(trig_id, trig.get("params", {}))
+        #
+        #     elif trig_type == "process_start":
+        #         self._register_process_start_monitor(trig_id, trig.get("params", {}))
+        #
+        #     elif trig_type == "process_stop":
+        #         self._register_process_stop_monitor(trig_id, trig.get("params", {}))
 
     def _register_power_event(self, trig_id, params):
         """注册电源事件监听"""
-        event_type = params.get("event_type", "both")  # plugged, unplugged, both
+        # params  拔出 插入
+        event_type = "both"  # plugged, unplugged, both
 
         def power_handler(event_data):
             self._run_actions(trig_id, event_data)
 
         if event_type in ["plugged", "both"]:
-            self.event_listener.register_power_handler("plugged", power_handler)
+            self.event_listener.register_power_handler("插入", power_handler)
         if event_type in ["unplugged", "both"]:
-            self.event_listener.register_power_handler("unplugged", power_handler)
+            self.event_listener.register_power_handler("拔出", power_handler)
 
     def _register_process_start_monitor(self, trig_id, params):
         """注册进程启动事件监听"""
-        process_name = params.get("process_name", "notepad.exe")
+        process_name = params
 
         def process_handler(process_name):
             self._run_actions(trig_id, process_name)
@@ -407,7 +495,7 @@ class TaskManager:
 
     def _register_process_stop_monitor(self, trig_id, params):
         """注册进程终止事件监听"""
-        process_name = params.get("process_name", "notepad.exe")
+        process_name = params
 
         def process_handler(process_name):
             self._run_actions(trig_id, process_name)
@@ -419,6 +507,7 @@ class TaskManager:
 class TaskManagerAPI:
     def __init__(self):
         self.task_manager = TaskManager()
+        self.task_manager.load_config()
 
     def start(self):
         """启动任务管理器"""

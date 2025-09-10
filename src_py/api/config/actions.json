@@ -43,5 +43,14 @@
     "param": [
       "D:\\winTools\\lenovoKeyboardTools\\LaunchGPU.exe"
     ]
+  },
+  {
+    "id": "a6",
+    "name": "修改屏幕亮度: 80",
+    "desc": "修改屏幕亮度: 80",
+    "func": "at2",
+    "param": [
+      80
+    ]
   }
 ]
