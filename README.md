@@ -1,6 +1,6 @@
 ## 该项目才刚刚开始, 计划写一个支持蓝牙和在线连接的电脑管理工具, 在这里你可以(用手机或者本地)控制你的电脑的音量, 屏幕亮度, 或者定时任务, 宏, 等等
 
-### 基础项目 pywebview-vue-template
+### 基础项目 [pywebview-vue-template](https://github.com/tansen87/pywebview-vue3-template)
 
 > Quickly building Python desktop applications
 

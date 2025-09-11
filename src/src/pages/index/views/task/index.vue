@@ -1,3 +1,4 @@
+<!--suppress CssUnusedSymbol -->
 <template>
   <div class="app-task">
     <div class="task-container bg-normal">
@@ -59,7 +60,7 @@
 
 <script setup>
 import {nextTick, ref} from "vue";
-import { reactive, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { Swiper, SwiperSlide } from "swiper/vue";
 import "swiper/swiper-bundle.css";
 import { Navigation } from "swiper/modules";
@@ -82,7 +83,7 @@ const task_config  = ref({
     {name: "示例1", desc: "sdwawdaw"},
   ],
   triggers: [
-      {name: "示例1", desc: "sdwawdaw"},
+    {name: "示例1", desc: "sdwawdaw"},
     {name: "示例1", desc: "sdwawdaw"},
     {name: "示例1", desc: "sdwawdaw"},
     {name: "示例1", desc: "sdwawdaw"},
@@ -95,7 +96,7 @@ const task_config  = ref({
     {name: "示例1", desc: "sdwawdaw"},
   ],
   actions: [
-      {name: "示例1", desc: "sdwawdaw"},
+    {name: "示例1", desc: "sdwawdaw"},
     {name: "示例1", desc: "sdwawdaw"},
     {name: "示例1", desc: "sdwawdaw"},
     {name: "示例1", desc: "sdwawdaw"},
@@ -111,7 +112,7 @@ const task_config  = ref({
   trigger_type: []});
 
 // 每个 tab 独立的数据
-const items1 = [
+/*const items1 = [
   { trigger: "稍后执行(秒): 1", action: "修改屏幕亮度: 40" },
   { trigger: "xxx", action: "xxx" },
 ];
@@ -122,7 +123,7 @@ const items2 = [
 const items3 = [
   { trigger: "触发器C1", action: "动作C1" },
   { trigger: "触发器C2", action: "动作C2" },
-];
+];*/
 
 // 生命周期
 onMounted(async () => {
@@ -171,6 +172,7 @@ function onSlideChange(swiper) {
   overflow: hidden;
   margin-left: .5rem;
   border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .tabs {
@@ -190,6 +192,7 @@ function onSlideChange(swiper) {
   color: #4a56e2;
 }
 
+/*noinspection CssOverwrittenProperties*/
 .swiper-container {
   height: calc(100vh - 7rem);
   height: calc(100dvh - 7rem);
@@ -208,6 +211,7 @@ function onSlideChange(swiper) {
   border-radius: 10px;
   padding: 10px;
   margin: 10px 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 .left {
   flex: 1;
