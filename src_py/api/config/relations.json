@@ -1,17 +1,30 @@
 [
   {
+    "id": "r1",
     "trigger_id": "t1",
     "action_id": "a1",
+    "enable": false,
     "desc": "稍后执行(秒): 1; 调整分辨率: 60Hz"
   },
   {
+    "id": "r2",
     "trigger_id": "t1",
     "action_id": "a3",
+    "enable": false,
     "desc": "稍后执行(秒): 1; 修改屏幕亮度: 40"
   },
   {
+    "id": "r3",
     "trigger_id": "t5",
     "action_id": "a2",
+    "enable": false,
     "desc": "稍后执行(秒): 5; 调整分辨率: 120Hz"
+  },
+  {
+    "id": "r4",
+    "trigger_id": "t1",
+    "action_id": "a6",
+    "enable": false,
+    "desc": "稍后执行(秒): 1; 修改屏幕亮度: 80"
   }
 ]

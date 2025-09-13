@@ -22,7 +22,7 @@
     },
     {
       "name": "测试",
-      "programs": ["chrome2.exe", "notepad3.exe"],
+      "programs": ["chrome.exe", "notepad.exe"],
       "hotkey": ["w", "a", "s", "d"],
       "stop_key": "<esc>",
       "actions": [

@@ -18,6 +18,7 @@ from src_py.api import MonitorUtils
 
 class ComputerInfo:
     def __init__(self):
+        pythoncom.CoInitialize()
         # 初始化音量接口
         devices = AudioUtilities.GetSpeakers()
         interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
@@ -25,8 +26,9 @@ class ComputerInfo:
         # 连接到 root\wmi 命名空间
         self.wmi_interface = wmi.WMI(namespace='root\\wmi')
 
-    # 获取 刷新率
+    # 设置 刷新率
     def set_refresh_rate(self, value):
+        print('set refresh rate:', value)
         return MonitorUtils.set_refresh_rate(None, value)
 
     # 获取 刷新率

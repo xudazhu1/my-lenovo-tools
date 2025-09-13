@@ -19,6 +19,9 @@ from src_py.api import system
 mouse_ctrl = pm.Controller()
 keyboard_ctrl = pynput_kb.Controller()
 
+# noinspection PyTypeChecker
+ctrl_map = {chr(i): chr(96 + i) for i in range(1, 27)}
+
 # 预加载常用模块以减少子进程初始化时间
 PRELOAD_MODULES = ['time', 'json', 'psutil', 'win32gui', 'win32process']
 for module in PRELOAD_MODULES:
@@ -30,7 +33,7 @@ def perform_actions(actions, macro_name, task_pid_dict_val, macros_press_map_val
     # 最新要执行的pid
     lasted_pid = task_pid_dict_val[macro_name].get(macro_name, -1)
     now_pid = os.getpid()
-    print(f"lasted pid: {lasted_pid}; now pid: {now_pid}")
+    # print(f"lasted pid: {lasted_pid}; now pid: {now_pid}")
     # 如果最新的pid和现在的pid不相等 说明该任务已被丢弃 主动停止执行
     if now_pid != lasted_pid:
         return
@@ -159,6 +162,7 @@ def is_program_foreground(programs):
     判断目标程序是否在前台（兼容普通窗口和大部分全屏程序）
     programs: ["notepad.exe", "game.exe"]
     """
+    # noinspection PyBroadException
     try:
         hwnd = win32gui.GetForegroundWindow()
         if hwnd == 0:
@@ -195,7 +199,7 @@ class Macro:
             on_release=self._my_on_release,
         )
         # 创建进程池以减少进程创建开销
-        self.process_pool = multiprocessing.Pool(processes=10)
+        self.process_pool = multiprocessing.Pool(processes=len(self.config.get("macros", [])))
         # 为每个 macro创建一个key 为name的共享dict
         for macro in self.config.get("macros", []):
             name = macro["name"]
@@ -215,10 +219,11 @@ class Macro:
             if not self.stop_key_macros_map.get(macro["stop_key"], False):
                 self.stop_key_macros_map[macro["stop_key"]] = []
             self.stop_key_macros_map[macro["stop_key"]].append(macro)
-        print(self.config)
+        # print(self.config)
 
     def update_config(self, config_temp):
         with open(self.config_path, "w", encoding="utf-8") as f:
+            # noinspection PyTypeChecker
             json.dump(config_temp, f, indent=4)
             self.config = config_temp
 
@@ -242,12 +247,12 @@ class Macro:
             name = f"<{event.name}>"
         else:
             name = event.char
-        # print(name)
+            if name in ctrl_map:
+                name = ctrl_map[name]
+        print(f"my_on_press 按下 = {name}")
         self.my_key_map[name] = True
         # 判断name是不是已经按下
-        if self.macros_press_map_val.get(name, False):
-            print("")
-        else:
+        if not self.macros_press_map_val.get(name, False):
             # self.handler_event(name)
             # 在新线程中执行长时间任务
             thread = threading.Thread(target=self.handler_event, args=(name,))
@@ -263,7 +268,9 @@ class Macro:
             name = f"<{event.name}>"
         else:
             name = event.char
-        # print(name)
+            if name in ctrl_map:
+                name = ctrl_map[name]
+        print(f"_my_on_release 抬起 = {name}")
         self.my_key_map[name] = False
         # 判断name是不是已经按下
         if self.macros_press_map_val.get(name, False):
@@ -272,9 +279,15 @@ class Macro:
             # print("由我取消此标记 macros_press_map_val." + name + "=0")
 
     def handler_event(self, name):
+        # 当所有按键抬起 或者没有任何宏运行的时候 主动终止循环?
+        all_key_released = True
         for e in self.my_key_map:
+            if not self.my_key_map[e]:
+                all_key_released = False
             print(f"hotkey_macros_map. {e} = {self.my_key_map[e]}")
         print(f"handler_event: {name}")
+
+
         # 根据 所有的 hotkey <space>+f 直接判断 是否触发?
         for hotkey in self.hotkey_macros_map.keys():
 

@@ -2,6 +2,8 @@ import os
 import json
 import subprocess
 import time
+import traceback
+
 import psutil
 import pythoncom
 import wmi
@@ -16,7 +18,7 @@ from src_py.api.ComputerInfo import ComputerInfo
 
 
 # 方法2：如果不想自己写 parser，可以用 croniter 库
-from croniter import croniter
+# from croniter import croniter
 def cron_to_aps_params(expr: str) -> dict:
     """
     将 5/6/7 字段 cron 表达式 转换为 apscheduler.CronTrigger 参数
@@ -144,7 +146,8 @@ class EventListener:
             while self._running:
                 try:
                     event = watcher()
-                    event_type = event.EventType
+                    print(f"Win32_PowerManagementEvent: {event}")
+                    # event_type = event.EventType
                     # if event_type == 10:
                     #     for handler in self.power_handlers.get("plugged", []):
                     #         handler("AC Power Plugged")
@@ -210,6 +213,7 @@ class EventListener:
 
 
 # ------------------ 管理器 ------------------
+# noinspection PyMethodMayBeStatic,PyTypeChecker
 class TaskManager:
     def __init__(self):
         self.scheduler = None
@@ -227,9 +231,9 @@ class TaskManager:
         if self._running:
             self.stop()
 
-    def _get_by_id(self, arr, id):
+    def _get_by_id(self, arr, id_val):
         for item in arr:
-            if item.id == id:
+            if item["id"] == id_val:
                 return item
         return None
 
@@ -325,6 +329,7 @@ class TaskManager:
             print("任务调度器已启动")
             return True
         except Exception as e:
+            traceback.print_exc()
             print(f"启动失败: {e}")
             return False
 
@@ -360,15 +365,15 @@ class TaskManager:
         """检查任务管理器是否运行中"""
         return self._running
 
-    def _run_actions(self, trig_id, *args):
+    def _run_actions(self, relation_id, *args):
         """执行触发器对应的动作"""
         for rel in self.relations:
-            if rel["trigger_id"] == trig_id:
+            if rel["id"] == relation_id:
                 action_id = rel["action_id"]
                 # action_info = self.actions[action_id]
                 action_info = self._get_by_id(self.actions, action_id)
                 # 查询符合action_id的动作
-                func_id = action_info["func"] # todo 这里要改为获取 action_type_id 和param
+                func_id = action_info["func"]
                 param = action_info["param"][0]
                 # 根据 action_info 获取到的 func_id param 去 action_type里找执行逻辑
                 action_type = self._get_by_id(self.action_type, func_id)
@@ -415,7 +420,12 @@ class TaskManager:
             self.scheduler.remove_all_jobs()
         # 改为 self.relations 里面取触发器!
         for relation in self.relations:
+            enabled = relation["enable"]
+            # 如果未启用 直接跳过
+            if not enabled:
+                continue
             trig_id = relation["trigger_id"]
+            relation_id = relation["id"]
             relation_name = relation["desc"]
             trig = self._get_by_id(self.triggers, trig_id)
             trig_type = trig["type"]
@@ -425,24 +435,24 @@ class TaskManager:
                 run_time = datetime.now() + timedelta(seconds=params[0]) # 延时任务 取秒数
                 self.scheduler.add_job(
                     self._run_actions, "date",
-                    run_date=run_time, args=[trig_id], id=trig_id
+                    run_date=run_time, args=[relation_id], id=relation_id
                 )
 
             elif trig_type == "cron":
                 params_cron = cron_to_aps_params(params[0]) # 格式化 cron表达式
                 self.scheduler.add_job(
                     self._run_actions, "cron",
-                    args=[trig_id], id=trig_id, **params_cron
+                    args=[relation_id], id=relation_id, **params_cron
                 )
 
             elif trig_type == "power":
-                self._register_power_event(trig_id, params[0])
+                self._register_power_event(relation_id, params[0])
 
             elif trig_type == "process_start":
-                self._register_process_start_monitor(trig_id, params[0])
+                self._register_process_start_monitor(relation_id, params[0])
 
             elif trig_type == "process_stop":
-                self._register_process_stop_monitor(trig_id, params[0])
+                self._register_process_stop_monitor(relation_id, params[0])
 
         # for trig in self.triggers:
         #     trig_id = trig["id"]
@@ -453,13 +463,13 @@ class TaskManager:
         #         run_time = datetime.now() + timedelta(**trig["params"])
         #         self.scheduler.add_job(
         #             self._run_actions, "date",
-        #             run_date=run_time, args=[trig_id], id=trig_id
+        #             run_date=run_time, args=[relation_id], id=relation_id
         #         )
         #
         #     elif trig_type == "cron":
         #         self.scheduler.add_job(
         #             self._run_actions, "cron",
-        #             args=[trig_id], id=trig_id, **trig["params"]
+        #             args=[relation_id], id=relation_id, **trig["params"]
         #         )
         #
         #     elif trig_type == "power":
@@ -471,34 +481,34 @@ class TaskManager:
         #     elif trig_type == "process_stop":
         #         self._register_process_stop_monitor(trig_id, trig.get("params", {}))
 
-    def _register_power_event(self, trig_id, params):
+    def _register_power_event(self, relation_id, params):
         """注册电源事件监听"""
         # params  拔出 插入
         event_type = "both"  # plugged, unplugged, both
 
         def power_handler(event_data):
-            self._run_actions(trig_id, event_data)
+            self._run_actions(relation_id, event_data)
 
         if event_type in ["plugged", "both"]:
             self.event_listener.register_power_handler("插入", power_handler)
         if event_type in ["unplugged", "both"]:
             self.event_listener.register_power_handler("拔出", power_handler)
 
-    def _register_process_start_monitor(self, trig_id, params):
+    def _register_process_start_monitor(self, relation_id, params):
         """注册进程启动事件监听"""
         process_name = params
 
-        def process_handler(process_name):
-            self._run_actions(trig_id, process_name)
+        def process_handler(process_name_val):
+            self._run_actions(relation_id, process_name_val)
 
         self.event_listener.register_process_start_handler(process_name, process_handler)
 
-    def _register_process_stop_monitor(self, trig_id, params):
+    def _register_process_stop_monitor(self, relation_id, params):
         """注册进程终止事件监听"""
         process_name = params
 
-        def process_handler(process_name):
-            self._run_actions(trig_id, process_name)
+        def process_handler(process_name_val):
+            self._run_actions(relation_id, process_name_val)
 
         self.event_listener.register_process_stop_handler(process_name, process_handler)
 
