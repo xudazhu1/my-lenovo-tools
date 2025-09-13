@@ -26,28 +26,44 @@
       "hotkey": ["w", "a", "s", "d"],
       "stop_key": "<esc>",
       "actions": [
-        {"keyboard": "a"},
-        {"wait": 0.2},
-        {"repeat": {"count": 2, "action": {"keyboard": "b"}}},
+        {"keyboard": "1"},
+        {"wait": 0.002},
+        {"repeat": {"count": 2, "action": {"keyboard": "2"}}},
         {"loop": {"count": 2, "actions": [
-          {"keyboard": "c"},
+          {"keyboard": "3"},
           {"wait": 0.1},
-          {"keyboard": "d"}
+          {"keyboard": "4"}
         ]}},
         {"loop": {"count": 0, "actions": [
-          {"keyboard": "e", "hold": 2},
-          {"wait": 0.001}
+          {"keyboard": "5", "hold": 0.001},
+          {"wait": 0.01}
         ]}}
       ]
     },
     {
       "name": "鸣潮视角",
-      "programs": ["Client-Win64-Shipping.exe"],
-      "hotkey": ["w","a","s","d"],
+      "programs": ["Client-Win64-Shipping.exe", "yuanshen.exe"],
+      "hotkey": ["w","a","s","d","e","q"],
       "stop_key": "<esc>",
       "actions": [
-        {"loop": {"count": 3, "actions": [
-          {"mouse": "wheel", "amount": -10}
+        {"loop": {"count": 2, "actions": [
+          {"mouse": "wheel", "amount": -15},
+          {"wait": 0.1}
+        ]}}
+      ]
+    },
+    {
+      "name": "原神剧情",
+      "programs": ["yuanshen.exe"],
+      "hotkey": ["f+<space>"],
+      "stop_key": "<alt>",
+      "actions": [
+        {"loop": {"count": 0,
+          "hold": 0.2,
+          "actions": [
+          {"keyboard": "f"},
+          {"wait": 0.1},
+          {"keyboard": " "}
         ]}}
       ]
     },
