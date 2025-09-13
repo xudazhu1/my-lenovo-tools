@@ -22,7 +22,7 @@
     },
     {
       "name": "测试",
-      "programs": ["chrome2.exe", "notepad.exe"],
+      "programs": ["chrome2.exe", "notepad3.exe"],
       "hotkey": ["w", "a", "s", "d"],
       "stop_key": "<esc>",
       "actions": [
@@ -31,12 +31,25 @@
         {"repeat": {"count": 2, "action": {"keyboard": "2"}}},
         {"loop": {"count": 2, "actions": [
           {"keyboard": "3"},
-          {"wait": 0.1},
+          {"wait": 0.01},
           {"keyboard": "4"}
         ]}},
-        {"loop": {"count": 0, "actions": [
+        {"loop": {"count": 100, "actions": [
           {"keyboard": "5", "hold": 0.001},
-          {"wait": 0.01}
+          {"wait": 1}
+        ]}}
+      ]
+    },
+    {
+      "name": "测试df",
+      "programs": ["chrome2.exe", "notepad.exe"],
+      "hotkey": ["<ctrl_l>+c"],
+      "stop_key": "<esc>",
+      "actions": [
+        {"loop": {"count": 100, "actions": [
+          {"keyboard": "d", "hold": 0.001},
+          {"keyboard": "f", "hold": 0.001},
+          {"wait": 0.05}
         ]}}
       ]
     },
