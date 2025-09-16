@@ -23,7 +23,7 @@
     {
       "name": "测试",
       "programs": ["chrome.exe", "notepad.exe"],
-      "hotkey": ["w", "a", "s", "d"],
+      "hotkey": ["w"],
       "stop_key": "<esc>",
       "actions": [
         {"keyboard": "1"},
@@ -60,23 +60,23 @@
       "stop_key": "<esc>",
       "actions": [
         {"loop": {"count": 2, "actions": [
-          {"mouse": "wheel", "amount": -15},
-          {"wait": 0.1}
+          {"mouse": "wheel", "amount": -20},
+          {"wait": 0.01}
         ]}}
       ]
     },
     {
       "name": "原神剧情",
-      "programs": ["yuanshen.exe"],
+      "programs": ["yuanshen.exe","notepad.exe"],
       "hotkey": ["f+<space>"],
-      "stop_key": "<alt>",
+      "stop_key": "w",
       "actions": [
         {"loop": {"count": 0,
           "hold": 0.2,
           "actions": [
           {"keyboard": "f"},
           {"wait": 0.1},
-          {"keyboard": " "}
+          {"keyboard": "<space>"}
         ]}}
       ]
     },

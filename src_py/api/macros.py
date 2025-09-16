@@ -271,21 +271,23 @@ class Macro:
             if name in ctrl_map:
                 name = ctrl_map[name]
         print(f"_my_on_release 抬起 = {name}")
-        self.my_key_map[name] = False
+        if self.my_key_map.get(name, False):
+            del self.my_key_map[name]
         # 判断name是不是已经按下
         if self.macros_press_map_val.get(name, False):
             # 由我取消此标记
             self.macros_press_map_val[name] = 0
             # print("由我取消此标记 macros_press_map_val." + name + "=0")
+        print(f"self.my_key_map = {self.my_key_map}")
 
     def handler_event(self, name):
         # 当所有按键抬起 或者没有任何宏运行的时候 主动终止循环?
-        all_key_released = True
-        for e in self.my_key_map:
-            if not self.my_key_map[e]:
-                all_key_released = False
-            print(f"hotkey_macros_map. {e} = {self.my_key_map[e]}")
-        print(f"handler_event: {name}")
+        # all_key_released = True
+        # for e in self.my_key_map:
+        #     if not self.my_key_map[e]:
+        #         all_key_released = False
+        #     print(f"hotkey_macros_map. {e} = {self.my_key_map[e]}")
+        # print(f"handler_event: {name}")
 
 
         # 根据 所有的 hotkey <space>+f 直接判断 是否触发?
@@ -338,13 +340,6 @@ class Macro:
 
 def run_macro(macro, task_pid_dict_val, macros_press_map_val):
     print(f"run_macro: {time.time()}")
-    # 设置信号处理器
-    def handle_signal(signum, frame):
-        signal_time = time.time()
-        print(f"[{time.time()}] 进程 {os.getpid()} 接收到信号 {signum}，正在退出")
-        raise SystemExit(f"[{time.time()}] 由信号终止，信号响应延迟: {time.time() - signal_time:.3f}秒")
-
-    signal.signal(signal.SIGTERM, handle_signal)
 
     # 将当前进程的PID存入字典，键为宏的名称
     # if not task_pid_dict_val.get(macro["name"], False):
@@ -368,8 +363,6 @@ def run_macro(macro, task_pid_dict_val, macros_press_map_val):
         print(f"[{name}] 宏启动")
         perform_actions(actions, name, task_pid_dict_val, macros_press_map_val)
         print(f"[{name}] 宏结束")
-    except SystemExit as e:
-        print(f"[{time.time()}] 任务 {macro['name']} 被信号中断: {e}")
     except Exception as e:
         traceback.print_exc()
         print(e)
