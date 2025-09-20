@@ -584,15 +584,28 @@ relations.json:
 ]
 """
 
+
+
+
 if __name__ == "__main__":
     # 创建API实例供pywebview使用
     # window.pywebview.api.task_start()
     # window.pywebview.api.task_stop()
     # window.pywebview.api.task_restart()
-    api = TaskManagerAPI()
 
-    # 示例：启动任务管理器
-    api.start()
+    # api = TaskManagerAPI()
+    #
+    # # 示例：启动任务管理器
+    # api.start()
+
+    scheduler = BackgroundScheduler(jobstores={'default': MemoryJobStore()})
+    params_cron = cron_to_aps_params("0/2 * * * * * *")  # 格式化 cron表达式
+    scheduler.add_job(
+        func_3, "cron",
+        args=["测试定时任务?"], id="test_id", **params_cron
+    )
+    scheduler.start()
+
 
     try:
         # 保持主线程运行

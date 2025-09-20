@@ -192,11 +192,12 @@ class Macro:
         self.stop_key_macros_map = {}
         self.multiprocessing_map = {} # 存储 正在运行的宏的线程对象的
         self.config = {}
+        self.handler_event_pid = -1
         with open(self.config_path, "r", encoding="utf-8") as f:
             self.config = json.load(f)
         self.listener = pynput_kb.Listener(
-            on_press=self._my_on_press,
-            on_release=self._my_on_release,
+            on_press=self._on_press,
+            on_release=self.on_release,
         )
         # 创建进程池以减少进程创建开销
         self.process_pool = multiprocessing.Pool(processes=len(self.config.get("macros", [])))
@@ -241,7 +242,6 @@ class Macro:
         print("宏系统已停止!!!")
 
     def _my_on_press(self, event):
-        # print("my_on_press 按下 = ")
         name = ''
         if isinstance(event, pynput_kb.Key):
             name = f"<{event.name}>"
@@ -253,16 +253,18 @@ class Macro:
         self.my_key_map[name] = True
         # 判断name是不是已经按下
         if not self.macros_press_map_val.get(name, False):
-            # self.handler_event(name)
-            # 在新线程中执行长时间任务
-            thread = threading.Thread(target=self.handler_event, args=(name,))
-            thread.daemon = True  # 设置为守护线程，确保程序退出时线程也会结束
-            thread.start()
-            # print("假装从犯on_press调用handler_event")
+            new_pid = time.time()
+            self.handler_event_pid = new_pid
+            self.handler_event(name, new_pid)
+
+    def _on_press(self, event):
+        # 在新线程中执行长时间任务
+        thread = threading.Thread(target=self._my_on_press, args=(event,))
+        thread.daemon = True  # 设置为守护线程，确保程序退出时线程也会结束
+        thread.start()
 
 
     def _my_on_release(self, event):
-        # print("my_on_release 释放 = ")
         name = ''
         if isinstance(event, pynput_kb.Key):
             name = f"<{event.name}>"
@@ -279,51 +281,64 @@ class Macro:
             self.macros_press_map_val[name] = 0
             # print("由我取消此标记 macros_press_map_val." + name + "=0")
         print(f"self.my_key_map = {self.my_key_map}")
+        # 如果所有按键都抬起 主动终止 handler_event 线程 不循环判断了
+        all_released = True
+        for key in self.my_key_map.keys():
+            if self.my_key_map.get(key, False):
+                all_released = False
+                break
+        if not all_released:
+            self.handler_event_pid = -1
 
-    def handler_event(self, name):
-        # 当所有按键抬起 或者没有任何宏运行的时候 主动终止循环?
-        # all_key_released = True
-        # for e in self.my_key_map:
-        #     if not self.my_key_map[e]:
-        #         all_key_released = False
-        #     print(f"hotkey_macros_map. {e} = {self.my_key_map[e]}")
-        # print(f"handler_event: {name}")
-
-
-        # 根据 所有的 hotkey <space>+f 直接判断 是否触发?
-        for hotkey in self.hotkey_macros_map.keys():
-
-            all_key_pressed = True
-            for key in hotkey.split('+'):
-                if not self.my_key_map.get(key, False):
-                    all_key_pressed = False
-            # 如果所有的key都被按下
-            if all_key_pressed:
-                for macro in self.hotkey_macros_map[hotkey]:
-                    # 寻找要触发的宏!
-                    print("尝试触发宏: " + macro["name"])
-                    if not is_program_running(macro["programs"]):
-                        print(f"[{name}] 目标程序未运行，跳过宏执行!。")
-                        continue
-
-                    # 使用进程池异步执行，减少启动延迟
-                    self.multiprocessing_map[macro["name"]] = self.process_pool.apply_async(
-                        run_macro, (macro,self.task_pid_dict_val, self.macros_press_map_val)
-                    )
-                    print(f"主进程调用了start = {time.time()}")
-        # 判断是否停止?
-        for stop_key in self.stop_key_macros_map.keys():
-            if self.my_key_map.get(stop_key, False):
-                macros = self.stop_key_macros_map[stop_key]
-                for macro in macros:
-                    if self.multiprocessing_map.get(macro["name"], None):
-                        print("发现 stop_key, 主动停止宏: " + macro["name"])
-                        thread = threading.Thread(target=self.stop_macro, args=(macro["name"],))
-                        thread.daemon = True  # 设置为守护线程，确保程序退出时线程也会结束
-                        thread.start()
-                        self.multiprocessing_map[macro["name"]] = None
+    def on_release(self, event):
+        # 在新线程中执行长时间任务
+        thread = threading.Thread(target=self._my_on_release, args=(event,))
+        thread.daemon = True  # 设置为守护线程，确保程序退出时线程也会结束
+        thread.start()
 
 
+    def handler_event(self, name, pid):
+        while True:
+            # 根据终止标记 决定是否主动停止
+            if pid != self.handler_event_pid:
+                return
+
+            # 根据 所有的 hotkey <space>+f 直接判断 是否触发?
+            for hotkey in self.hotkey_macros_map.keys():
+
+                all_key_pressed = True
+                for key in hotkey.split('+'):
+                    if not self.my_key_map.get(key, False):
+                        all_key_pressed = False
+                # 如果所有的key都被按下
+                if all_key_pressed:
+                    for macro in self.hotkey_macros_map[hotkey]:
+                        # 寻找要触发的宏!
+                        print("尝试触发宏: " + macro["name"])
+                        if not is_program_running(macro["programs"]):
+                            print(f"[{name}] 目标程序未运行，跳过宏执行!。")
+                            continue
+
+                        # 使用进程池异步执行，减少启动延迟
+                        self.multiprocessing_map[macro["name"]] = self.process_pool.apply_async(
+                            run_macro, (macro, self.task_pid_dict_val, self.macros_press_map_val)
+                        )
+                        print(f"主进程调用了start = {time.time()}")
+            # 判断是否停止?
+            for stop_key in self.stop_key_macros_map.keys():
+                if self.my_key_map.get(stop_key, False):
+                    macros = self.stop_key_macros_map[stop_key]
+                    for macro in macros:
+                        if self.multiprocessing_map.get(macro["name"], None):
+                            print("发现 stop_key, 主动停止宏: " + macro["name"])
+                            thread = threading.Thread(target=self.stop_macro, args=(macro["name"],))
+                            thread.daemon = True  # 设置为守护线程，确保程序退出时线程也会结束
+                            thread.start()
+                            self.multiprocessing_map[macro["name"]] = None
+
+
+            # 每秒10次循环
+            time.sleep(0.1)
 
     def stop_macro(self, macro_name):
 

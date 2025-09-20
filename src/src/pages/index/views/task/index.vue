@@ -2,59 +2,71 @@
 <template>
   <div class="app-task">
     <div class="task-container bg-normal">
-    <!-- Tabs -->
-    <div class="tabs">
-      <div
-        v-for="(tab, index) in tabs"
-        :key="index"
-        :class="['tab', { active: activeIndex === index }]"
-        @click="goTo(index)"
-      >
-        {{ tab }}
+      <!-- Tabs -->
+      <div class="tabs">
+        <div
+          v-for="(tab, index) in tabs"
+          :key="index"
+          :class="['tab', { active: activeIndex === index }]"
+          @click="goTo(index)"
+        >
+          {{ tab }}
+        </div>
       </div>
+
+      <!-- Swiper 内容区 --> <!-- 动画时长 400ms -->
+      <swiper
+        @swiper="onSwiper"
+        :modules="[Navigation]"
+        :onSlideChange="onSlideChange"
+        :initial-slide="activeIndex"
+        :speed="400"
+        class="swiper-container"
+      >
+        <!-- 三份内容区 -->
+        <swiper-slide class="swiper-slide-task">
+          <div class="list ">
+            <div v-for="(item, i) in task_config.relations" :key="i" class="list-item bg-gray-200">
+              <div class="left">任务{{ i }}:</div>
+              <div class="middle">动作: <span class="action">{{ item.desc }}</span></div>
+              <button class="close-btn">×</button>
+            </div>
+          </div>
+        </swiper-slide>
+
+        <swiper-slide>
+          <div class="list ">
+            <div v-for="(item, i) in task_config.triggers" :key="i" class="list-item bg-gray-200">
+              <div class="left">{{ item.name }}:</div>
+              <div class="middle">描述: <span class="action">{{ item.desc || item.name }}</span></div>
+              <button class="close-btn">×</button>
+            </div>
+          </div>
+        </swiper-slide>
+
+        <swiper-slide>
+          <div class="list ">
+            <div v-for="(item, i) in task_config.actions" :key="i" class="list-item bg-gray-200">
+              <div class="left">{{ item.name }}:</div>
+              <div class="middle">描述: <span class="action">{{ item.desc || item.name }}</span></div>
+              <button class="close-btn">×</button>
+            </div>
+          </div>
+        </swiper-slide>
+      </swiper>
+      <!-- 悬浮添加按钮 -->
+      <DraggableButton
+        width="60px"
+        height="60px"
+        :coordinates="{ bottom: '2rem', right: '2rem' }"
+        :click="() => {$refs.cronDialog.show()}"
+        :iconScale="0.4"
+      >
+      <el-icon><plus /></el-icon>
+      </DraggableButton>
+
     </div>
-
-    <!-- Swiper 内容区 --> <!-- 动画时长 400ms -->
-    <swiper
-      @swiper="onSwiper"
-      :modules="[Navigation]"
-      :onSlideChange="onSlideChange"
-      :initial-slide="activeIndex"
-      :speed="400"
-      class="swiper-container"
-    >
-      <!-- 三份内容区 -->
-      <swiper-slide class="swiper-slide-task">
-        <div class="list ">
-          <div v-for="(item, i) in task_config.relations" :key="i" class="list-item bg-gray-200">
-            <div class="left">任务{{ i }}:</div>
-            <div class="middle">动作: <span class="action">{{ item.desc }}</span></div>
-            <button class="close-btn">×</button>
-          </div>
-        </div>
-      </swiper-slide>
-
-      <swiper-slide>
-        <div class="list ">
-          <div v-for="(item, i) in task_config.triggers" :key="i" class="list-item bg-gray-200">
-            <div class="left">{{ item.name }}:</div>
-            <div class="middle">描述: <span class="action">{{ item.desc || item.name }}</span></div>
-            <button class="close-btn">×</button>
-          </div>
-        </div>
-      </swiper-slide>
-
-      <swiper-slide>
-        <div class="list ">
-          <div v-for="(item, i) in task_config.actions" :key="i" class="list-item bg-gray-200">
-            <div class="left">{{ item.name }}:</div>
-            <div class="middle">描述: <span class="action">{{ item.desc || item.name }}</span></div>
-            <button class="close-btn">×</button>
-          </div>
-        </div>
-      </swiper-slide>
-    </swiper>
-  </div>
+    <cron ref="cronDialog"></cron>
   </div>
 </template>
 
@@ -64,6 +76,10 @@ import { onMounted } from 'vue';
 import { Swiper, SwiperSlide } from "swiper/vue";
 import "swiper/swiper-bundle.css";
 import { Navigation } from "swiper/modules";
+import Cron from "@p-index/views/task/cron.vue";
+import {Plus} from "@element-plus/icons-vue";
+import DraggableButton from "@/components/buttonFloat/DraggableButton.vue";
+import {ElMessage} from "element-plus";
 
 const tabs = ["任务", "触发器", "动作"];
 const activeIndex = ref(0);
@@ -110,6 +126,7 @@ const task_config  = ref({
   ],
   action_type: [],
   trigger_type: []});
+
 
 // 每个 tab 独立的数据
 /*const items1 = [
@@ -159,6 +176,7 @@ function onSlideChange(swiper) {
 </script>
 
 <style scoped>
+
 .swiper-slide-task {
   overflow-y: auto;
 }

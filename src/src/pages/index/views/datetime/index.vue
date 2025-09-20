@@ -8,12 +8,15 @@
     <div class="mt-4">
       更多时间处理请见：<el-link type="primary">下班工具库</el-link>
     </div>
+    <!-- 悬浮刷新按钮 -->
+    <el-icon><plus /></el-icon>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useIntervalFn } from '@vueuse/core'
 import { ref } from 'vue'
+import {Edit, Plus} from "@element-plus/icons-vue";
 
 const now = ref(new Date())
 
