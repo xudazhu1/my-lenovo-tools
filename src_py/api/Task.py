@@ -39,7 +39,11 @@ def cron_to_aps_params(expr: str) -> dict:
     else:
         raise ValueError(f"不支持的字段数: {length} (必须是5/6/7)，表达式: {expr}")
 
-    return dict(zip(keys, fields))
+    res = dict(zip(keys, fields))
+    # 使用字典推导式创建新字典，过滤掉不需要的键
+    res = {key: value for key, value in res.items() if value not in ['*', '?']}
+
+    return res
 
 # ------------------ 动作函数 ------------------
 def func_1():
@@ -599,7 +603,7 @@ if __name__ == "__main__":
     # api.start()
 
     scheduler = BackgroundScheduler(jobstores={'default': MemoryJobStore()})
-    params_cron = cron_to_aps_params("0/2 * * * * * *")  # 格式化 cron表达式
+    params_cron = cron_to_aps_params("0/2 * * ? * 1 *")  # 格式化 cron表达式
     scheduler.add_job(
         func_3, "cron",
         args=["测试定时任务?"], id="test_id", **params_cron
@@ -613,4 +617,4 @@ if __name__ == "__main__":
             time.sleep(5)
     except KeyboardInterrupt:
         print("退出中...")
-        api.stop()
+        # api.stop()

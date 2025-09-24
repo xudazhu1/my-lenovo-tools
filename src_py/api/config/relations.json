@@ -26,5 +26,12 @@
     "action_id": "a6",
     "enable": false,
     "desc": "稍后执行(秒): 1; 修改屏幕亮度: 80"
+  },
+  {
+    "id": "r5",
+    "trigger_id": "t2",
+    "action_id": "a4",
+    "enable": true,
+    "desc": "测试a4"
   }
 ]

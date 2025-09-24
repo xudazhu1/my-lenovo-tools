@@ -11,8 +11,11 @@ import pageComponents from './components'
 import './permission'
 import '@/mock'
 import './styles/index.css'
+import fillEmpty from '@/components/fillEmpty/fillEmpty'
 
 const app = createApp(App)
+
+app.directive('fill-empty', fillEmpty)
 
 app
   .use(router)
